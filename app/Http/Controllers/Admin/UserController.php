@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use App\Models\DistrictMaster;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Crypt;
 
 class UserController extends Controller
 {
@@ -123,10 +125,17 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create()
     {
         $roles = Role::where('name', '!=', 'Super Admin')->pluck('name', 'name')->all();
-        return view('admin.users.create', compact('roles'));
+
+        $districts = DistrictMaster::orderBy('name')->get()
+            ->map(function ($district) {
+                $district->encrypted_id = Crypt::encrypt($district->id);
+                return $district;
+            });
+
+        return view('admin.users.create', compact('roles', 'districts'));
     }
 
     /**
