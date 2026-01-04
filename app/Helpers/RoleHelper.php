@@ -40,7 +40,7 @@ if (!function_exists('current_user_master_data')) {
         return match (current_user_role()) {
             'SI'            => $user->circle,
             'School Admin'      => $user->school,
-            'HOI Primary'       => $user->hoi,
+            'HOI Primary'       => $user->school,
             'District Officer'  => $user->district,
             default             => null,
         };
@@ -134,7 +134,7 @@ if (!function_exists('user_scope')) {
         $master = master_details();
 
         return match ($role) {
-            'School Admin', 'HOI' => [
+            'School Admin', 'HOI Primary' => [
                 'school_code_fk'   => $master->id,
                 'circle_code_fk'   => $master->circle_code_fk,
                 'district_code_fk' => $master->district_code_fk,

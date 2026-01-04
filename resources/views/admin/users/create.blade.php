@@ -124,21 +124,29 @@
                                                                     <span class="fw-medium">{{ $roleDisplay }}</span>
                                                                 </div>
                                                                 @if ($roleName == 'Super Admin')
-                                                                    <small class="text-muted d-block mt-1">Full system access</small>
+                                                                    <small class="text-muted d-block mt-1">Full system
+                                                                        access</small>
                                                                 @elseif($roleName == 'State Admin')
-                                                                    <small class="text-muted d-block mt-1">State level access</small>
+                                                                    <small class="text-muted d-block mt-1">State level
+                                                                        access</small>
                                                                 @elseif($roleName == 'District Admin')
-                                                                    <small class="text-muted d-block mt-1">District level access</small>
+                                                                    <small class="text-muted d-block mt-1">District level
+                                                                        access</small>
                                                                 @elseif($roleName == 'Block Admin')
-                                                                    <small class="text-muted d-block mt-1">Block level access</small>
+                                                                    <small class="text-muted d-block mt-1">Block level
+                                                                        access</small>
                                                                 @elseif($roleName == 'School Admin')
-                                                                    <small class="text-muted d-block mt-1">School level access</small>
+                                                                    <small class="text-muted d-block mt-1">School level
+                                                                        access</small>
                                                                 @elseif($roleName == 'Circle')
-                                                                    <small class="text-muted d-block mt-1">Circle level access</small>
+                                                                    <small class="text-muted d-block mt-1">Circle level
+                                                                        access</small>
                                                                 @elseif($roleName == 'Hoi Primary')
-                                                                    <small class="text-muted d-block mt-1">Head of Institution (Primary)</small>
+                                                                    <small class="text-muted d-block mt-1">Head of
+                                                                        Institution (Primary)</small>
                                                                 @elseif($roleName == 'School')
-                                                                    <small class="text-muted d-block mt-1">School level user</small>
+                                                                    <small class="text-muted d-block mt-1">School level
+                                                                        user</small>
                                                                 @endif
                                                             </label>
                                                         </div>
@@ -169,12 +177,13 @@
                                             <div class="row">
                                                 <!-- District -->
                                                 <div class="col-md-3 mb-3">
-                                                    <label class="form-label">District <span class="text-danger">*</span></label>
+                                                    <label class="form-label">District <span
+                                                            class="text-danger">*</span></label>
                                                     <select class="form-select" id="district_id" name="district_id">
                                                         <option value="">Select District</option>
                                                         @foreach ($districts ?? [] as $district)
                                                             <option value="{{ $district->encrypted_id }}"
-                                                                {{ (old('district_id') == $district->encrypted_id || (isset($user) && $user->district_id == $district->encrypted_id)) ? 'selected' : '' }}>
+                                                                {{ old('district_id') == $district->encrypted_id || (isset($user) && $user->district_id == $district->encrypted_id) ? 'selected' : '' }}>
                                                                 {{ $district->name }}
                                                             </option>
                                                         @endforeach
@@ -183,11 +192,13 @@
 
                                                 <!-- Circle -->
                                                 <div class="col-md-3 mb-3" id="circleBox" style="display: none;">
-                                                    <label class="form-label">Circle <span class="text-danger">*</span></label>
+                                                    <label class="form-label">Circle <span
+                                                            class="text-danger">*</span></label>
                                                     <select class="form-select" id="circle_id" name="circle_id">
                                                         <option value="">Select Circle</option>
-                                                        @if(isset($user) && $user->circle_id)
-                                                            <option value="{{ $user->circle_id }}" selected>{{ $user->circle->name ?? 'Selected Circle' }}</option>
+                                                        @if (isset($user) && $user->circle_id)
+                                                            <option value="{{ $user->circle_id }}" selected>
+                                                                {{ $user->circle->name ?? 'Selected Circle' }}</option>
                                                         @endif
                                                     </select>
                                                 </div>
@@ -197,19 +208,23 @@
                                                     <label class="form-label">Management</label>
                                                     <select class="form-select" id="management_id" name="management_id">
                                                         <option value="">Select Management</option>
-                                                        @if(isset($user) && $user->management_id)
-                                                            <option value="{{ $user->management_id }}" selected>{{ $user->management->name ?? 'Selected Management' }}</option>
+                                                        @if (isset($user) && $user->management_id)
+                                                            <option value="{{ $user->management_id }}" selected>
+                                                                {{ $user->management->name ?? 'Selected Management' }}
+                                                            </option>
                                                         @endif
                                                     </select>
                                                 </div>
 
                                                 <!-- School -->
                                                 <div class="col-md-3 mb-3" id="schoolBox" style="display: none;">
-                                                    <label class="form-label">School <span class="text-danger">*</span></label>
+                                                    <label class="form-label">School <span
+                                                            class="text-danger">*</span></label>
                                                     <select class="form-select" id="school_id" name="school_id">
                                                         <option value="">Select School</option>
-                                                        @if(isset($user) && $user->school_id)
-                                                            <option value="{{ $user->school_id }}" selected>{{ $user->school->name ?? 'Selected School' }}</option>
+                                                        @if (isset($user) && $user->school_id)
+                                                            <option value="{{ $user->school_id }}" selected>
+                                                                {{ $user->school->name ?? 'Selected School' }}</option>
                                                         @endif
                                                     </select>
                                                 </div>
@@ -499,132 +514,7 @@
     </div>
 @endsection
 
-@push('css')
-    <style>
-        .breadcrumb {
-            background-color: #f8f9fa;
-            border-radius: 0.375rem;
-            padding: 0.75rem 1rem;
-        }
 
-        .breadcrumb-item a {
-            color: var(--bs-primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .breadcrumb-item a:hover {
-            color: var(--bs-primary-dark);
-        }
-
-        .breadcrumb-item.active {
-            color: var(--bs-secondary);
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .card-role {
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            padding: 1rem;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .card-role:hover {
-            border-color: var(--bs-primary);
-            background-color: rgba(var(--bs-primary-rgb), 0.05);
-        }
-
-        .card-role .form-check-input:checked~.form-check-label {
-            color: var(--bs-primary);
-            font-weight: 600;
-        }
-
-        .card-role.selected {
-            border-color: var(--bs-primary);
-            background-color: rgba(var(--bs-primary-rgb), 0.1);
-            box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
-        }
-
-        .form-check-input:checked {
-            background-color: var(--bs-primary);
-            border-color: var(--bs-primary);
-        }
-
-        .form-label {
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .card-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .bg-light {
-            background-color: #f8f9fa !important;
-        }
-
-        /* Password Strength Styles */
-        .password-strength .progress {
-            background-color: #e9ecef;
-        }
-
-        .password-strength .progress-bar {
-            transition: width 0.3s ease, background-color 0.3s ease;
-        }
-
-        .password-requirements li {
-            transition: color 0.3s ease;
-        }
-
-        .password-requirements .valid {
-            color: var(--bs-success) !important;
-        }
-
-        .password-requirements .valid i {
-            color: var(--bs-success) !important;
-        }
-
-        .password-match .valid {
-            color: var(--bs-success) !important;
-        }
-
-        .password-match .invalid {
-            color: var(--bs-danger) !important;
-        }
-
-        @media (max-width: 768px) {
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start !important;
-            }
-
-            .card-header .btn {
-                margin-top: 0.5rem;
-                align-self: flex-end;
-            }
-
-            .card-footer .d-flex {
-                flex-direction: column;
-                gap: 1rem !important;
-            }
-
-            .card-footer .d-flex>div:first-child {
-                order: 2;
-                text-align: center;
-            }
-
-            .card-footer .d-flex>div:last-child {
-                order: 1;
-            }
-        }
-    </style>
-@endpush
 
 @push('scripts')
     <script>
@@ -660,14 +550,30 @@
 
             // Role Configuration
             const roleConfig = {
-                'Super Admin': { locations: [] },
-                'State Admin': { locations: [] },
-                'District Admin': { locations: ['district'] },
-                'Block Admin': { locations: ['district', 'circle'] },
-                'SI': { locations: ['district', 'circle'] },
-                'School Admin': { locations: ['district', 'circle', 'school'] },
-                'HOI Primary': { locations: ['district', 'circle', 'school'] },
-                'School': { locations: ['district', 'circle', 'management', 'school'] }
+                'Super Admin': {
+                    locations: []
+                },
+                'State Admin': {
+                    locations: []
+                },
+                'District Admin': {
+                    locations: ['district']
+                },
+                'Block Admin': {
+                    locations: ['district', 'circle']
+                },
+                'SI': {
+                    locations: ['district', 'circle']
+                },
+                'School Admin': {
+                    locations: ['district', 'circle', 'school']
+                },
+                'HOI Primary': {
+                    locations: ['district', 'circle', 'school']
+                },
+                'School': {
+                    locations: ['district', 'circle', 'management', 'school']
+                }
             };
 
             // Role change handler
@@ -682,7 +588,7 @@
 
                 // Get configuration for selected role
                 const config = roleConfig[role];
-                console.log('config',config);
+                console.log('config', config);
                 if (!config) return;
 
                 // Show/hide location section
@@ -691,7 +597,7 @@
 
                     // Show required fields based on role
                     config.locations.forEach(field => {
-                        switch(field) {
+                        switch (field) {
                             case 'district':
                                 // District is always shown when location section is visible
                                 break;
@@ -776,7 +682,8 @@
                     .then(data => {
                         circleSelect.innerHTML = '<option value="">Select Circle</option>';
                         data.forEach(circle => {
-                            circleSelect.innerHTML += `<option value="${circle.id}">${circle.name}</option>`;
+                            circleSelect.innerHTML +=
+                                `<option value="${circle.encrypted_id}">${circle.name}</option>`;
                         });
 
                         // Show circle box if it should be visible for current role
@@ -784,6 +691,8 @@
                         if (selectedRole && roleConfig[selectedRole]?.locations.includes('circle')) {
                             circleBox.style.display = 'block';
                         }
+
+                        document.getElementById('dise_code').value = '';
                     })
                     .catch(error => console.error('Error loading circles:', error));
             }
@@ -803,7 +712,8 @@
                     .then(data => {
                         managementSelect.innerHTML = '<option value="">Select Management</option>';
                         data.forEach(management => {
-                            managementSelect.innerHTML += `<option value="${management.id}">${management.name}</option>`;
+                            managementSelect.innerHTML +=
+                                `<option value="${management.id}">${management.name}</option>`;
                         });
                         managementBox.style.display = 'block';
                     })
@@ -812,26 +722,40 @@
 
             // Load schools based on circle
             function loadSchools(circleId) {
-                console.log('Loading schools for circle ID:', circleId);
-                console.log('School select districtId:', districtId);
+                document.getElementById('dise_code').value = '';
+                const district_id = districtSelect.value;
+
+                if (!district_id) {
+                    alert('Please select a district first.');
+                    return;
+                }
+
                 if (!circleId) {
                     schoolSelect.innerHTML = '<option value="">Select School</option>';
                     schoolBox.style.display = 'none';
                     return;
                 }
 
-                fetch(`/api/circles/${circleId}/schools`)
+                // Using the API endpoint with query parameters
+                fetch(`/get-schools?district_id=${district_id}&circle_id=${circleId}`)
                     .then(response => response.json())
                     .then(data => {
                         schoolSelect.innerHTML = '<option value="">Select School</option>';
                         data.forEach(school => {
-                            schoolSelect.innerHTML += `<option value="${school.id}">${school.name}</option>`;
+                            // Store DISE code in data attribute
+                            schoolSelect.innerHTML +=
+                                `<option value="${school.encrypted_id}"
+                                    data-dise="${school.code}">
+                                    ${school.name || school.school_name}
+                                    </option>`;
                         });
                         schoolBox.style.display = 'block';
                     })
-                    .catch(error => console.error('Error loading schools:', error));
+                    .catch(error => {
+                        console.error('Error loading schools:', error);
+                        alert('Failed to load schools. Please try again.');
+                    });
             }
-
             // Load schools based on management
             function loadSchoolsByManagement(managementId) {
                 if (!managementId) {
@@ -845,7 +769,8 @@
                     .then(data => {
                         schoolSelect.innerHTML = '<option value="">Select School</option>';
                         data.forEach(school => {
-                            schoolSelect.innerHTML += `<option value="${school.id}">${school.name}</option>`;
+                            schoolSelect.innerHTML +=
+                                `<option value="${school.id}">${school.name}</option>`;
                         });
                         schoolBox.style.display = 'block';
                     })
@@ -853,6 +778,21 @@
             }
 
             // Event Listeners
+
+            // Add event listener for school selection change
+            schoolSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const diseCode = selectedOption.getAttribute('data-dise');
+
+                // Get the dise_code input element (make sure it exists)
+                const diseCodeInput = document.getElementById('dise_code');
+
+                if (diseCodeInput && diseCode) {
+                    diseCodeInput.value = diseCode;
+                } else if (diseCodeInput) {
+                    diseCodeInput.value = ''; // Clear if no DISE code
+                }
+            });
             roleRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     handleRoleChange(this.value);
@@ -866,7 +806,6 @@
 
             circleSelect.addEventListener('change', function() {
                 const selectedRole = getSelectedRole();
-                alert('Selected role in circle change:', selectedRole);
                 if (selectedRole === 'School') {
                     loadManagements(this.value);
                 } else {
@@ -914,7 +853,10 @@
                     requirementsMet.special = true;
                 }
 
-                return { strength, requirementsMet };
+                return {
+                    strength,
+                    requirementsMet
+                };
             }
 
             function updatePasswordStrength() {
@@ -928,7 +870,10 @@
                     return;
                 }
 
-                const { strength, requirementsMet } = checkPasswordStrength(passwordValue);
+                const {
+                    strength,
+                    requirementsMet
+                } = checkPasswordStrength(passwordValue);
                 passwordStrengthBar.style.width = strength + '%';
 
                 if (strength <= 20) {
@@ -1060,9 +1005,13 @@
                 }
 
                 if (passwordValue && passwordValue.length > 0) {
-                    const { strength } = checkPasswordStrength(passwordValue);
+                    const {
+                        strength
+                    } = checkPasswordStrength(passwordValue);
                     if (strength < 60) {
-                        alert('Please choose a stronger password. Password should include uppercase, lowercase, numbers, and special characters.');
+                        alert(
+                            'Please choose a stronger password. Password should include uppercase, lowercase, numbers, and special characters.'
+                        );
                         password.focus();
                         return false;
                     }
