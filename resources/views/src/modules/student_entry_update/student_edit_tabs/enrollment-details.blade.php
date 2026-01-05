@@ -588,10 +588,12 @@ $(document).ready(function () {
 
             },
             error: function () {
-         $('#enrollmentFailedModal').modal('show');
+            $('#confirmUpdateModalEnrollmentInfo').modal('hide');
+            $('#enrollmentFailedModal').modal('show');
 
             },
             complete: function () {
+
                 $('#confirmUpdateEnrollmentBtn').prop('disabled', false);
             }
         });

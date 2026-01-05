@@ -588,7 +588,8 @@ $(document).ready(function () {
                 $('#basicInfoSuccessModal').modal('show');
             },
             error: function () {
-                alert('Error while saving basic details');
+            $('#confirmBasicInfoUpdateModal').modal('hide');
+            $('#BasicInfoFailedModal').modal('show');
             },
             complete: function () {
                 $('#confirmBasicInfoUpdateBtn').prop('disabled', false);
