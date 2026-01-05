@@ -18,7 +18,14 @@ class StudentDeleteDeacivateController extends Controller
     {
         try {
             $user = Auth::user();
-            $roleName = optional($user->roles()->first())->name;
+            $user_role_info = user_roles_map();
+            $roleName       = $user_role_info['role_name'];
+            $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
+            $district_id    = $scope['district_code_fk'] ?? null;
+            $subdivision_id = $scope['subdivision_code_fk'] ?? null;
+            $circle_id      = $scope['circle_code_fk'] ?? null;
+            $management_id  = $scope['school_management_code_fk'] ?? null;
+            $school_id      = $scope['school_code_fk'] ?? null;
             // dd($roleName);
             $query = StudentDeactivateModel::query()
                 ->with([
@@ -31,16 +38,15 @@ class StudentDeleteDeacivateController extends Controller
                 ->where('status', 3);;
             if (in_array($roleName, ['School Admin', 'HOI Primary'])) {
                 // School user → only their school
-                $userSchool = $user->schoolMaster;
-                $query->where('school_code_fk', $userSchool->id)
+                $query->where('school_code_fk', $school_id)
                     ->where('status', 3);
             } elseif ($roleName === 'SI') {
                 // SI officer → district + circle
-                $query->where('district_code_fk', $user->district_code_fk)
-                    ->where('circle_code_fk', $user->circle_code_fk);
+                $query->where('district_code_fk', $district_id)
+                    ->where('circle_code_fk', $circle_id);
             } elseif ($roleName === 'District Officer') {
                 // District officer → district only
-                $query->where('district_code_fk', $user->district_code_fk);
+                $query->where('district_code_fk', $district_id);
             }
             // dd($query);
             $deactive_students = $query->get();
@@ -62,10 +68,15 @@ class StudentDeleteDeacivateController extends Controller
     {
         try {
             $user = Auth::user();
-            // dd($user);
-            $roleName = optional($user->roles()->first())->name;
-            $userSchool = $user->schoolMaster;
-            // dd($roleName);
+            $user_role_info = user_roles_map();
+            $roleName       = $user_role_info['role_name'];
+            $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
+            $district_id    = $scope['district_code_fk'] ?? null;
+            $subdivision_id = $scope['subdivision_code_fk'] ?? null;
+            $circle_id      = $scope['circle_code_fk'] ?? null;
+            $management_id  = $scope['school_management_code_fk'] ?? null;
+            $school_id      = $scope['school_code_fk'] ?? null;
+            dd($school_id);
 
             // -------------------------------
             // Validation
@@ -104,16 +115,16 @@ class StudentDeleteDeacivateController extends Controller
             // -------------------------------
             // HOI / SCHOOL ADMIN
             // -------------------------------
-            if (in_array($roleName, ['School Admin', 'HOI Primary']) && $userSchool) {
-                $query->where('school_code_fk', $userSchool->id)
+            if (in_array($roleName, ['HOI Primary'])) {
+                $query->where('school_code_fk', $school_id)
                     ->where('status', 1);
 
                 // -------------------------------
                 // SI (CIRCLE OFFICER)
                 // -------------------------------
             } elseif ($roleName === 'SI') {
-                $query->where('district_code_fk', $userSchool->district_code_fk)
-                    ->where('circle_code_fk', $userSchool->circle_code_fk);
+                $query->where('district_code_fk', $district_id)
+                    ->where('circle_code_fk', $circle_id);
                     if($searchPurpose === 2)
                     {
                         $query->where('status', 2);
@@ -127,10 +138,10 @@ class StudentDeleteDeacivateController extends Controller
                 // -------------------------------
             } elseif ($roleName === 'District Officer') {
 
-                $query->where('district_code_fk', $userSchool->district_code_fk)
+                $query->where('district_code_fk', $district_id)
                     ->whereIn('status', [1,2,3]);
             }
-            // dd($query);
+            dd($query);
             $student = $query->first();
             // dd($student);
 
@@ -179,6 +190,15 @@ class StudentDeleteDeacivateController extends Controller
     public function deactivateStudent(Request $request)
     {
         try {
+            $user = Auth::user();
+            $user_role_info = user_roles_map();
+            $roleName       = $user_role_info['role_name'];
+            $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
+            $district_id    = $scope['district_code_fk'] ?? null;
+            $subdivision_id = $scope['subdivision_code_fk'] ?? null;
+            $circle_id      = $scope['circle_code_fk'] ?? null;
+            $management_id  = $scope['school_management_code_fk'] ?? null;
+            $school_id      = $scope['school_code_fk'] ?? null;
 
             // -------------------------------
             // 1. Validate input
@@ -187,10 +207,6 @@ class StudentDeleteDeacivateController extends Controller
                 'student_code' => 'required|string|size:14',
                 'deactivate_reason_code_fk' => 'required|integer|exists:bs_reason_student_deactivation_master,id',
             ]);
-
-            $user = Auth::user();
-            $roleName = optional($user->roles()->first())->name;
-            $userSchool = $user->schoolMaster;
 
             // -------------------------------
             // 2. Build student query (ROLE BASED)
@@ -201,17 +217,17 @@ class StudentDeleteDeacivateController extends Controller
                 ->lockForUpdate();
 
             // SCHOOL USER
-            if (in_array($roleName, ['School Admin', 'HOI Primary']) && $userSchool) {
-                $studentQuery->where('school_code_fk', $userSchool->id);
+            if (in_array($roleName, ['HOI Primary'])) {
+                $studentQuery->where('school_code_fk', $school_id);
 
                 // CIRCLE OFFICER
             } elseif ($roleName === 'SI') {
-                $studentQuery->where('district_code_fk', $user->district_code_fk)
-                    ->where('circle_code_fk', $user->circle_code_fk);
+                $studentQuery->where('district_code_fk', $district_id)
+                    ->where('circle_code_fk', $circle_id);
 
                 // DISTRICT OFFICER
             } elseif ($roleName === 'District Officer') {
-                $studentQuery->where('district_code_fk', $user->district_code_fk);
+                $studentQuery->where('district_code_fk', $district_id);
             }
 
             $student = $studentQuery->first();
@@ -278,8 +294,14 @@ class StudentDeleteDeacivateController extends Controller
     {
         try {
             $user = Auth::user();
-            dd($user);
-            $roleName = optional($user->roles()->first())->name;
+            $user_role_info = user_roles_map();
+            $roleName       = $user_role_info['role_name'];
+            $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
+            $district_id    = $scope['district_code_fk'] ?? null;
+            $subdivision_id = $scope['subdivision_code_fk'] ?? null;
+            $circle_id      = $scope['circle_code_fk'] ?? null;
+            $management_id  = $scope['school_management_code_fk'] ?? null;
+            $school_id      = $scope['school_code_fk'] ?? null;
             // dd($roleName);
             // dd($userSchool);
 
@@ -294,30 +316,28 @@ class StudentDeleteDeacivateController extends Controller
                 ->whereIn('status', [1,2,3]);
 
             // ----------------------------------
-            // ROLE BASED FILTERING
+            // ROLE BASED FILTERINGKJ
             // ----------------------------------
 
             // SCHOOL USER (HOI / School Admin)
-            if (in_array($roleName, ['School Admin', 'HOI Primary']) && $userSchool) {
-                $userSchool = $user->schoolMaster;
-                $query->where('school_code_fk', $userSchool->id);
+            if (in_array($roleName, ['HOI Primary'])) {
+                $query->where('school_code_fk', $school_id);
 
                 // CIRCLE OFFICER
             } elseif ($roleName === 'SI') { // keep typo if role name exists like this
 
-                $query->where('district_code_fk', $user->district_code_fk)
-                    ->where('circle_code_fk', $user->circle_code_fk);
+                $query->where('district_code_fk', $district_id)
+                    ->where('circle_code_fk', $circle_id);
 
                 // DISTRICT OFFICER
             } elseif ($roleName === 'District Officer') {
 
-                $query->where('district_code_fk', $user->district_code_fk);
+                $query->where('district_code_fk', $district_id);
             }
 
             // ----------------------------------
             // Execute
             // ----------------------------------
-            dd($query);
             $deleted_students = $query->get();
 
             return view(
@@ -336,7 +356,15 @@ class StudentDeleteDeacivateController extends Controller
     public function deleteStudent(Request $request)
     {
         try {
-
+            $user = Auth::user();
+            $user_role_info = user_roles_map();
+            $roleName       = $user_role_info['role_name'];
+            $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
+            $district_id    = $scope['district_code_fk'] ?? null;
+            $subdivision_id = $scope['subdivision_code_fk'] ?? null;
+            $circle_id      = $scope['circle_code_fk'] ?? null;
+            $management_id  = $scope['school_management_code_fk'] ?? null;
+            $school_id      = $scope['school_code_fk'] ?? null;
             // ---------------------------------
             // 1. Validate input
             // ---------------------------------
@@ -345,10 +373,6 @@ class StudentDeleteDeacivateController extends Controller
                 'delete_reason_code_fk' => 'nullable|integer|exists:bs_student_delete_reason,id',
                 'status'  => 'nullable|integer|in:1,2,3',
             ]);
-
-            $user = Auth::user();
-            $roleName = optional($user->roles()->first())->name;
-            $userSchool = $user->schoolMaster;
             DB::beginTransaction();
 
             // ---------------------------------
@@ -358,11 +382,11 @@ class StudentDeleteDeacivateController extends Controller
                 ->where('student_code', $data['student_code'])
                 ->lockForUpdate();
 
-            if ($roleName === 'HOI Primary' && $userSchool) {
-                $studentQuery->where('school_code_fk', $userSchool->id);
+            if ($roleName === 'HOI Primary') {
+                $studentQuery->where('school_code_fk', $school_id);
             } elseif ($roleName === 'SI') {
-                    $studentQuery->where('district_code_fk', $user->district_code_fk)
-                    ->where('circle_code_fk', $user->circle_code_fk);
+                    $studentQuery->where('district_code_fk', $district_id)
+                    ->where('circle_code_fk', $circle_id);
             }
 
             $student = $studentQuery->first();
@@ -694,6 +718,15 @@ class StudentDeleteDeacivateController extends Controller
     public function activateStudent(Request $request)
     {
         try {
+            $user = Auth::user();
+            $user_role_info = user_roles_map();
+            $roleName       = $user_role_info['role_name'];
+            $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
+            $district_id    = $scope['district_code_fk'] ?? null;
+            $subdivision_id = $scope['subdivision_code_fk'] ?? null;
+            $circle_id      = $scope['circle_code_fk'] ?? null;
+            $management_id  = $scope['school_management_code_fk'] ?? null;
+            $school_id      = $scope['school_code_fk'] ?? null;
             $data = $request->validate([
                 'student_code'          => 'required|string|size:14'
             ]);
@@ -706,6 +739,7 @@ class StudentDeleteDeacivateController extends Controller
          * ------------------------------------------------- */
             $deletedStudent = DB::table('bs_student_master')
                 ->where('student_code', $studentCode)
+                ->where('district_code_fk', $district_id)
                 ->where('status', 3)
                 ->first();
 
@@ -721,6 +755,7 @@ class StudentDeleteDeacivateController extends Controller
          * ------------------------------------------------- */
             $activeExists = DB::table('bs_student_master')
                 ->where('student_code', $studentCode)
+                ->where('district_code_fk', $district_id)
                 ->where('status', 1)
                 ->exists();
 
@@ -736,6 +771,7 @@ class StudentDeleteDeacivateController extends Controller
          * ------------------------------------------------- */
             $track = DB::table('bs_student_activate_deactivate_track')
                 ->where('student_code', $studentCode)
+                ->where('district_code_fk', $district_id)
                 ->whereIn('status', [1, 2])
                 ->first();
 
@@ -804,6 +840,7 @@ class StudentDeleteDeacivateController extends Controller
          * ------------------------------------------------- */
             DB::table('bs_student_master')
                 ->where('student_code', $studentCode)
+                ->where('district_code_fk', $district_id)
                 ->update([
                     'status' => 1,
                     'updated_at' => now()
@@ -814,6 +851,7 @@ class StudentDeleteDeacivateController extends Controller
          * ------------------------------------------------- */
             DB::table('bs_student_history')
                 ->where('student_code', $studentCode)
+                ->where('district_code_fk', $district_id)
                 ->update([
                     'status' => 1,
                     'updated_at' => now()
