@@ -20,8 +20,17 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'sso_id', 'name', 'email', 'password', 'phone', 'dise_code', 'department',
-        'designation', 'last_login_at', 'status', 'impersonator_id'
+        'sso_id',
+        'name',
+        'email',
+        'password',
+        'phone',
+        'dise_code',
+        'department',
+        'designation',
+        'last_login_at',
+        'status',
+        'impersonator_id'
     ];
 
     /**
@@ -115,6 +124,27 @@ class User extends Authenticatable
     {
         return $this->belongsTo(SchoolMaster::class, 'user_id', 'id');
     }
+
+    public function circle()
+    {
+        return $this->hasOne(CircleMaster::class, 'schcd', 'dise_code');
+    }
+
+    public function school()
+    {
+        return $this->hasOne(SchoolMaster::class, 'schcd', 'dise_code');
+    }
+
+    public function district()
+    {
+        return $this->hasOne(DistrictMaster::class, 'district_id', 'dise_code');
+    }
+
+    public function hoi()
+    {
+        return $this->hasOne(SchoolMaster::class, 'schcd', 'dise_code');
+    }
+
 
     /**
      * Get the user who is impersonating this user

@@ -1502,8 +1502,8 @@ class StudentInfoController extends Controller
             // ===============================
             // Get user's role information
             // ===============================
-            $user = Auth::user();
-            $user_role_info = user_roles_map();          // 🔥 from helper
+            $user           = Auth::user();
+            $user_role_info = user_roles_map();
             $roleName       = $user_role_info['role_name'];
 
             // ===============================
@@ -1521,27 +1521,29 @@ class StudentInfoController extends Controller
             // ===============================
             // Filter parameters - Set defaults based on role
             // ===============================
-            $district_id = null;
-            $subdivision_id = null;
-            $circle_id = null;
-            $management_id = null;
-            $school_id = null;
+            $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
+
+            $district_id    = $scope['district_code_fk'] ?? null;
+            $subdivision_id = $scope['subdivision_code_fk'] ?? null;
+            $circle_id      = $scope['circle_code_fk'] ?? null;
+            $management_id  = $scope['school_management_code_fk'] ?? null;
+            $school_id      = $scope['school_code_fk'] ?? null;
 
             // Role-based restrictions
-            if ($user_role_info['is_school_user'] && $userSchool) {
-                // School users (HOI Primary, School Admin) - restrict to their school
-                $district_id = $userSchool->district_code_fk;
-                $circle_id = $userSchool->circle_code_fk;
-                $subdivision_id = $userSchool->subdivision_code_fk;
-                $school_id = $userSchool->id;
-                $management_id = $userSchool->school_management_code_fk;
-            } elseif ($user_role_info['is_circle_officer'] && $userCircle) {
-                // Circle officers - restrict to their circle
-                $circle_id = $userCircle->id ?? 66;
-                $circle_id = 66;
-                $district_id = $userCircle->district_id ?? 1;
-                $district_id = 1;
-            }
+            // if ($user_role_info['is_school_user'] && $userSchool) {
+            //     // School users (HOI Primary, School Admin) - restrict to their school
+            //     $district_id = $userSchool->district_code_fk;
+            //     $circle_id = $userSchool->circle_code_fk;
+            //     $subdivision_id = $userSchool->subdivision_code_fk;
+            //     $school_id = $userSchool->id;
+            //     $management_id = $userSchool->school_management_code_fk;
+            // } elseif ($user_role_info['is_circle_officer'] && $userCircle) {
+            //     // Circle officers - restrict to their circle
+            //     $circle_id = $userCircle->id ?? 66;
+            //     $circle_id = 66;
+            //     $district_id = $userCircle->district_id ?? 1;
+            //     $district_id = 1;
+            // }
             // Super Admin - no restrictions
 
             // Override with request values if provided (respecting role restrictions)

@@ -16,10 +16,12 @@ class DashboardController extends Controller
     {
         // dd(Auth::user()->schoolMaster->school_name);
         $user = Auth::user();
-        $user = Session::get(config('sso.session.user'));
         $session = Session::get(config('sso.session.session_data'));
 
-        return view('dashboard', compact('user', 'session'));
+        // Get school details
+        $school = $user->schoolMaster ?? null;
+
+        return view('dashboard', compact('user', 'session', 'school'));
     }
 
     /**
@@ -43,7 +45,8 @@ class DashboardController extends Controller
         return view('profile', compact('user', 'role'));
     }
 
-    public function profileUpdate(){
+    public function profileUpdate()
+    {
         $user = Auth::user();
         $role = $user->getRoleNames()->first() ?? 'User';
 

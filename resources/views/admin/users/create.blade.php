@@ -91,7 +91,135 @@
                                 </div>
                             @endif
 
-                            <div class="row">
+                            <!-- Roles Section - Radio Buttons -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body">
+                                            <label class="form-label fw-semibold mb-3">
+                                                <i class="bx bx-shield-alt me-2"></i>
+                                                System Role <span class="text-danger">*</span>
+                                            </label>
+                                            @error('role')
+                                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                    <i class="bx bx-error-circle me-2"></i>
+                                                    {{ $message }}
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                            @enderror
+
+                                            <div class="row">
+                                                @foreach ($roles as $roleName => $roleDisplay)
+                                                    <div class="col-md-4 col-lg-3 mb-3">
+                                                        <div class="form-check card-role">
+                                                            <input class="form-check-input" type="radio" name="role"
+                                                                value="{{ $roleName }}" id="role_{{ $roleName }}"
+                                                                {{ (isset($userRole) && in_array($roleName, $userRole)) || old('role') == $roleName ? 'checked' : '' }}
+                                                                {{ $roleName == 'Super Admin' && !auth()->user()->hasRole('Super Admin') ? 'disabled' : '' }}>
+                                                            <label class="form-check-label w-100"
+                                                                for="role_{{ $roleName }}">
+                                                                <div class="d-flex align-items-center">
+                                                                    <i class="bx bx-shield-quarter me-2 text-primary"></i>
+                                                                    <span class="fw-medium">{{ $roleDisplay }}</span>
+                                                                </div>
+                                                                @if ($roleName == 'Super Admin')
+                                                                    <small class="text-muted d-block mt-1">Full system access</small>
+                                                                @elseif($roleName == 'State Admin')
+                                                                    <small class="text-muted d-block mt-1">State level access</small>
+                                                                @elseif($roleName == 'District Admin')
+                                                                    <small class="text-muted d-block mt-1">District level access</small>
+                                                                @elseif($roleName == 'Block Admin')
+                                                                    <small class="text-muted d-block mt-1">Block level access</small>
+                                                                @elseif($roleName == 'School Admin')
+                                                                    <small class="text-muted d-block mt-1">School level access</small>
+                                                                @elseif($roleName == 'Circle')
+                                                                    <small class="text-muted d-block mt-1">Circle level access</small>
+                                                                @elseif($roleName == 'Hoi Primary')
+                                                                    <small class="text-muted d-block mt-1">Head of Institution (Primary)</small>
+                                                                @elseif($roleName == 'School')
+                                                                    <small class="text-muted d-block mt-1">School level user</small>
+                                                                @endif
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            @if (!auth()->user()->hasRole('Super Admin'))
+                                                <div class="alert alert-warning mt-3 mb-0">
+                                                    <i class="bx bx-info-circle me-2"></i>
+                                                    <strong>Note:</strong> You cannot assign or modify Super Admin roles.
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Role Based Location Section -->
+                            <div class="row mt-4" id="locationSection" style="display: none;">
+                                <div class="col-12">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body">
+                                            <label class="form-label fw-semibold mb-3">
+                                                <i class="bx bx-map me-2"></i>
+                                                Location Assignment
+                                            </label>
+                                            <div class="row">
+                                                <!-- District -->
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">District <span class="text-danger">*</span></label>
+                                                    <select class="form-select" id="district_id" name="district_id">
+                                                        <option value="">Select District</option>
+                                                        @foreach ($districts ?? [] as $district)
+                                                            <option value="{{ $district->encrypted_id }}"
+                                                                {{ (old('district_id') == $district->encrypted_id || (isset($user) && $user->district_id == $district->encrypted_id)) ? 'selected' : '' }}>
+                                                                {{ $district->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <!-- Circle -->
+                                                <div class="col-md-3 mb-3" id="circleBox" style="display: none;">
+                                                    <label class="form-label">Circle <span class="text-danger">*</span></label>
+                                                    <select class="form-select" id="circle_id" name="circle_id">
+                                                        <option value="">Select Circle</option>
+                                                        @if(isset($user) && $user->circle_id)
+                                                            <option value="{{ $user->circle_id }}" selected>{{ $user->circle->name ?? 'Selected Circle' }}</option>
+                                                        @endif
+                                                    </select>
+                                                </div>
+
+                                                <!-- Management -->
+                                                <div class="col-md-3 mb-3" id="managementBox" style="display: none;">
+                                                    <label class="form-label">Management</label>
+                                                    <select class="form-select" id="management_id" name="management_id">
+                                                        <option value="">Select Management</option>
+                                                        @if(isset($user) && $user->management_id)
+                                                            <option value="{{ $user->management_id }}" selected>{{ $user->management->name ?? 'Selected Management' }}</option>
+                                                        @endif
+                                                    </select>
+                                                </div>
+
+                                                <!-- School -->
+                                                <div class="col-md-3 mb-3" id="schoolBox" style="display: none;">
+                                                    <label class="form-label">School <span class="text-danger">*</span></label>
+                                                    <select class="form-select" id="school_id" name="school_id">
+                                                        <option value="">Select School</option>
+                                                        @if(isset($user) && $user->school_id)
+                                                            <option value="{{ $user->school_id }}" selected>{{ $user->school->name ?? 'Selected School' }}</option>
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row pt-4">
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="name" class="form-label">
@@ -340,73 +468,6 @@
                                     </div>
                                 </div>
                             @endif
-
-                            <!-- Roles Section - Changed to Radio Buttons -->
-                            <div class="row mt-4">
-                                <div class="col-12">
-                                    <div class="card border-0 bg-light">
-                                        <div class="card-body">
-                                            <label class="form-label fw-semibold mb-3">
-                                                <i class="bx bx-shield-alt me-2"></i>
-                                                System Role <span class="text-danger">*</span>
-                                            </label>
-                                            @error('role')
-                                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                                    <i class="bx bx-error-circle me-2"></i>
-                                                    {{ $message }}
-                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                            @enderror
-
-                                            <div class="row">
-                                                @foreach ($roles as $roleName => $roleDisplay)
-                                                    <div class="col-md-4 col-lg-3 mb-3">
-                                                        <div class="form-check card-role">
-                                                            <input class="form-check-input" type="radio" name="role"
-                                                                value="{{ $roleName }}"
-                                                                id="role_{{ $roleName }}"
-                                                                {{ isset($userRole) && in_array($roleName, $userRole) ? 'checked' : '' }}
-                                                                {{ $roleName == 'Super Admin' && !auth()->user()->hasRole('Super Admin') ? 'disabled' : '' }}
-                                                                {{ old('role') == $roleName ? 'checked' : '' }}>
-                                                            <label class="form-check-label w-100"
-                                                                for="role_{{ $roleName }}">
-                                                                <div class="d-flex align-items-center">
-                                                                    <i class="bx bx-shield-quarter me-2 text-primary"></i>
-                                                                    <span class="fw-medium">{{ $roleDisplay }}</span>
-                                                                </div>
-                                                                @if ($roleName == 'Super Admin')
-                                                                    <small class="text-muted d-block mt-1">Full system
-                                                                        access</small>
-                                                                @elseif($roleName == 'State Admin')
-                                                                    <small class="text-muted d-block mt-1">State level
-                                                                        access</small>
-                                                                @elseif($roleName == 'District Admin')
-                                                                    <small class="text-muted d-block mt-1">District level
-                                                                        access</small>
-                                                                @elseif($roleName == 'Block Admin')
-                                                                    <small class="text-muted d-block mt-1">Block level
-                                                                        access</small>
-                                                                @elseif($roleName == 'School Admin')
-                                                                    <small class="text-muted d-block mt-1">School level
-                                                                        access</small>
-                                                                @endif
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-
-                                            @if (!auth()->user()->hasRole('Super Admin'))
-                                                <div class="alert alert-warning mt-3 mb-0">
-                                                    <i class="bx bx-info-circle me-2"></i>
-                                                    <strong>Note:</strong> You cannot assign or modify Super Admin roles.
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="card-footer bg-transparent">
@@ -483,17 +544,13 @@
             font-weight: 600;
         }
 
-        .card-role .form-check-input[type="radio"]:checked~.form-check-label {
-            color: var(--bs-primary);
-            font-weight: 600;
+        .card-role.selected {
+            border-color: var(--bs-primary);
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+            box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
         }
 
         .form-check-input:checked {
-            background-color: var(--bs-primary);
-            border-color: var(--bs-primary);
-        }
-
-        .form-check-input[type="radio"]:checked {
             background-color: var(--bs-primary);
             border-color: var(--bs-primary);
         }
@@ -541,13 +598,6 @@
             color: var(--bs-danger) !important;
         }
 
-        /* Role Selection Styles */
-        .card-role.selected {
-            border-color: var(--bs-primary);
-            background-color: rgba(var(--bs-primary-rgb), 0.1);
-            box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
-        }
-
         @media (max-width: 768px) {
             .card-header {
                 flex-direction: column;
@@ -579,6 +629,18 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const locationSection = document.getElementById('locationSection');
+            const districtSelect = document.getElementById('district_id');
+            const circleBox = document.getElementById('circleBox');
+            const circleSelect = document.getElementById('circle_id');
+            const managementBox = document.getElementById('managementBox');
+            const managementSelect = document.getElementById('management_id');
+            const schoolBox = document.getElementById('schoolBox');
+            const schoolSelect = document.getElementById('school_id');
+            const roleRadios = document.querySelectorAll('input[name="role"]');
+
+            // Password elements
             const password = document.getElementById('password');
             const confirmPassword = document.getElementById('password_confirmation');
             const passwordStrengthBar = document.getElementById('password-strength-bar');
@@ -596,7 +658,227 @@
                 special: document.getElementById('req-special')
             };
 
-            // Password strength checker
+            // Role Configuration
+            const roleConfig = {
+                'Super Admin': { locations: [] },
+                'State Admin': { locations: [] },
+                'District Admin': { locations: ['district'] },
+                'Block Admin': { locations: ['district', 'circle'] },
+                'SI': { locations: ['district', 'circle'] },
+                'School Admin': { locations: ['district', 'circle', 'school'] },
+                'HOI Primary': { locations: ['district', 'circle', 'school'] },
+                'School': { locations: ['district', 'circle', 'management', 'school'] }
+            };
+
+            // Role change handler
+            function handleRoleChange(role) {
+                console.log('Selected role:', role);
+
+                // Reset all location fields
+                resetLocationFields();
+
+                // Hide location section by default
+                locationSection.style.display = 'none';
+
+                // Get configuration for selected role
+                const config = roleConfig[role];
+                console.log('config',config);
+                if (!config) return;
+
+                // Show/hide location section
+                if (config.locations.length > 0) {
+                    locationSection.style.display = 'block';
+
+                    // Show required fields based on role
+                    config.locations.forEach(field => {
+                        switch(field) {
+                            case 'district':
+                                // District is always shown when location section is visible
+                                break;
+                            case 'si':
+                                circleBox.style.display = 'block';
+                                circleSelect.required = true;
+                                break;
+                            case 'management':
+                                managementBox.style.display = 'block';
+                                managementSelect.required = true;
+                                break;
+                            case 'school':
+                                schoolBox.style.display = 'block';
+                                schoolSelect.required = true;
+                                break;
+                        }
+                    });
+
+                    // Initialize AJAX chains based on existing selections
+                    initializeLocationChains();
+                }
+            }
+
+            // Reset location fields
+            function resetLocationFields() {
+                circleBox.style.display = 'none';
+                managementBox.style.display = 'none';
+                schoolBox.style.display = 'none';
+
+                circleSelect.innerHTML = '<option value="">Select Circle</option>';
+                managementSelect.innerHTML = '<option value="">Select Management</option>';
+                schoolSelect.innerHTML = '<option value="">Select School</option>';
+
+                circleSelect.required = false;
+                managementSelect.required = false;
+                schoolSelect.required = false;
+            }
+
+            // Initialize location chains
+            function initializeLocationChains() {
+                // If district is already selected, load circles
+                if (districtSelect.value) {
+                    loadCircles(districtSelect.value);
+                }
+
+                // If circle is already selected, load schools/managements
+                if (circleSelect.value) {
+                    const selectedRole = getSelectedRole();
+                    if (selectedRole === 'School') {
+                        loadManagements(circleSelect.value);
+                    } else {
+                        loadSchools(circleSelect.value);
+                    }
+                }
+
+                // If management is already selected, load schools
+                if (managementSelect.value) {
+                    loadSchoolsByManagement(managementSelect.value);
+                }
+            }
+
+            // Get selected role
+            function getSelectedRole() {
+                const selectedRadio = document.querySelector('input[name="role"]:checked');
+                return selectedRadio ? selectedRadio.value : null;
+            }
+
+            // Load circles based on district
+            function loadCircles(districtId) {
+                if (!districtId) {
+                    circleSelect.innerHTML = '<option value="">Select Circle</option>';
+                    managementSelect.innerHTML = '<option value="">Select Management</option>';
+                    schoolSelect.innerHTML = '<option value="">Select School</option>';
+                    circleBox.style.display = 'none';
+                    managementBox.style.display = 'none';
+                    schoolBox.style.display = 'none';
+                    return;
+                }
+
+                fetch(`/get-circles?district_id=${districtId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        circleSelect.innerHTML = '<option value="">Select Circle</option>';
+                        data.forEach(circle => {
+                            circleSelect.innerHTML += `<option value="${circle.id}">${circle.name}</option>`;
+                        });
+
+                        // Show circle box if it should be visible for current role
+                        const selectedRole = getSelectedRole();
+                        if (selectedRole && roleConfig[selectedRole]?.locations.includes('circle')) {
+                            circleBox.style.display = 'block';
+                        }
+                    })
+                    .catch(error => console.error('Error loading circles:', error));
+            }
+
+            // Load managements based on circle
+            function loadManagements(circleId) {
+                if (!circleId) {
+                    managementSelect.innerHTML = '<option value="">Select Management</option>';
+                    schoolSelect.innerHTML = '<option value="">Select School</option>';
+                    managementBox.style.display = 'none';
+                    schoolBox.style.display = 'none';
+                    return;
+                }
+
+                fetch(`/api/circles/${circleId}/managements`)
+                    .then(response => response.json())
+                    .then(data => {
+                        managementSelect.innerHTML = '<option value="">Select Management</option>';
+                        data.forEach(management => {
+                            managementSelect.innerHTML += `<option value="${management.id}">${management.name}</option>`;
+                        });
+                        managementBox.style.display = 'block';
+                    })
+                    .catch(error => console.error('Error loading managements:', error));
+            }
+
+            // Load schools based on circle
+            function loadSchools(circleId) {
+                console.log('Loading schools for circle ID:', circleId);
+                console.log('School select districtId:', districtId);
+                if (!circleId) {
+                    schoolSelect.innerHTML = '<option value="">Select School</option>';
+                    schoolBox.style.display = 'none';
+                    return;
+                }
+
+                fetch(`/api/circles/${circleId}/schools`)
+                    .then(response => response.json())
+                    .then(data => {
+                        schoolSelect.innerHTML = '<option value="">Select School</option>';
+                        data.forEach(school => {
+                            schoolSelect.innerHTML += `<option value="${school.id}">${school.name}</option>`;
+                        });
+                        schoolBox.style.display = 'block';
+                    })
+                    .catch(error => console.error('Error loading schools:', error));
+            }
+
+            // Load schools based on management
+            function loadSchoolsByManagement(managementId) {
+                if (!managementId) {
+                    schoolSelect.innerHTML = '<option value="">Select School</option>';
+                    schoolBox.style.display = 'none';
+                    return;
+                }
+
+                fetch(`/api/managements/${managementId}/schools`)
+                    .then(response => response.json())
+                    .then(data => {
+                        schoolSelect.innerHTML = '<option value="">Select School</option>';
+                        data.forEach(school => {
+                            schoolSelect.innerHTML += `<option value="${school.id}">${school.name}</option>`;
+                        });
+                        schoolBox.style.display = 'block';
+                    })
+                    .catch(error => console.error('Error loading schools by management:', error));
+            }
+
+            // Event Listeners
+            roleRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    handleRoleChange(this.value);
+                    updateRoleSelectionUI();
+                });
+            });
+
+            districtSelect.addEventListener('change', function() {
+                loadCircles(this.value);
+            });
+
+            circleSelect.addEventListener('change', function() {
+                const selectedRole = getSelectedRole();
+                alert('Selected role in circle change:', selectedRole);
+                if (selectedRole === 'School') {
+                    loadManagements(this.value);
+                } else {
+                    loadSchools(this.value);
+                }
+            });
+
+            managementSelect.addEventListener('change', function() {
+                loadSchoolsByManagement(this.value);
+            });
+
+            // Password validation functions
             function checkPasswordStrength(password) {
                 let strength = 0;
                 const requirementsMet = {
@@ -607,43 +889,34 @@
                     special: false
                 };
 
-                // Length requirement
                 if (password.length >= 8) {
                     strength += 20;
                     requirementsMet.length = true;
                 }
 
-                // Uppercase requirement
                 if (/[A-Z]/.test(password)) {
                     strength += 20;
                     requirementsMet.uppercase = true;
                 }
 
-                // Lowercase requirement
                 if (/[a-z]/.test(password)) {
                     strength += 20;
                     requirementsMet.lowercase = true;
                 }
 
-                // Number requirement
                 if (/[0-9]/.test(password)) {
                     strength += 20;
                     requirementsMet.number = true;
                 }
 
-                // Special character requirement
                 if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
                     strength += 20;
                     requirementsMet.special = true;
                 }
 
-                return {
-                    strength,
-                    requirementsMet
-                };
+                return { strength, requirementsMet };
             }
 
-            // Update password strength UI
             function updatePasswordStrength() {
                 const passwordValue = password.value;
 
@@ -655,15 +928,9 @@
                     return;
                 }
 
-                const {
-                    strength,
-                    requirementsMet
-                } = checkPasswordStrength(passwordValue);
-
-                // Update progress bar
+                const { strength, requirementsMet } = checkPasswordStrength(passwordValue);
                 passwordStrengthBar.style.width = strength + '%';
 
-                // Update strength text and color
                 if (strength <= 20) {
                     passwordStrengthBar.className = 'progress-bar bg-danger';
                     passwordStrengthText.textContent = 'Password strength: Very Weak';
@@ -681,11 +948,9 @@
                     passwordStrengthText.textContent = 'Password strength: Excellent';
                 }
 
-                // Update requirements UI
                 updateRequirementsUI(requirementsMet);
             }
 
-            // Update requirements checklist
             function updateRequirementsUI(requirementsMet) {
                 Object.keys(requirementsMet).forEach(key => {
                     const requirement = requirements[key];
@@ -701,7 +966,6 @@
                 });
             }
 
-            // Reset requirements UI
             function resetRequirements() {
                 Object.values(requirements).forEach(requirement => {
                     requirement.classList.remove('valid');
@@ -710,7 +974,6 @@
                 });
             }
 
-            // Check password match
             function checkPasswordMatch() {
                 const passwordValue = password.value;
                 const confirmValue = confirmPassword.value;
@@ -732,22 +995,18 @@
                 }
             }
 
-            // Validate DISE code
             function validateDiseCode() {
                 const diseCode = document.getElementById('dise_code').value.trim();
 
-                // If empty, it's valid (nullable field)
                 if (!diseCode) {
                     return true;
                 }
 
-                // Check if it's all digits
                 if (!/^\d+$/.test(diseCode)) {
                     alert('DISE code must contain only numbers (0-9)');
                     return false;
                 }
 
-                // Check length (2-11 digits)
                 if (diseCode.length < 2 || diseCode.length > 11) {
                     alert('DISE code must be between 2 and 11 digits');
                     return false;
@@ -756,26 +1015,54 @@
                 return true;
             }
 
-            // Validate form before submission
             function validateForm() {
+                const selectedRole = getSelectedRole();
                 const passwordValue = password.value;
                 const isEditMode = {{ isset($user) ? 'true' : 'false' }};
 
-                // For new users, password is required
+                // Role validation
+                if (!selectedRole) {
+                    alert('Please select a role for the user.');
+                    return false;
+                }
+
+                // Location validation based on role
+                const config = roleConfig[selectedRole];
+                if (config.locations.includes('district') && !districtSelect.value) {
+                    alert('Please select a district for this role.');
+                    districtSelect.focus();
+                    return false;
+                }
+
+                if (config.locations.includes('circle') && !circleSelect.value) {
+                    alert('Please select a circle for this role.');
+                    circleSelect.focus();
+                    return false;
+                }
+
+                if (config.locations.includes('management') && !managementSelect.value) {
+                    alert('Please select a management for this role.');
+                    managementSelect.focus();
+                    return false;
+                }
+
+                if (config.locations.includes('school') && !schoolSelect.value) {
+                    alert('Please select a school for this role.');
+                    schoolSelect.focus();
+                    return false;
+                }
+
+                // Password validation
                 if (!isEditMode && (!passwordValue || passwordValue.length < 8)) {
                     alert('Please enter a strong password with at least 8 characters');
                     password.focus();
                     return false;
                 }
 
-                // For password changes, validate strength
                 if (passwordValue && passwordValue.length > 0) {
-                    const {
-                        strength
-                    } = checkPasswordStrength(passwordValue);
+                    const { strength } = checkPasswordStrength(passwordValue);
                     if (strength < 60) {
-                        alert(
-                            'Please choose a stronger password. Password should include uppercase, lowercase, numbers, and special characters.');
+                        alert('Please choose a stronger password. Password should include uppercase, lowercase, numbers, and special characters.');
                         password.focus();
                         return false;
                     }
@@ -787,53 +1074,34 @@
                     }
                 }
 
-                // Validate DISE code
+                // DISE code validation
                 if (!validateDiseCode()) {
-                    return false;
-                }
-
-                // Check if a role is selected
-                const selectedRole = document.querySelector('input[name="role"]:checked');
-                if (!selectedRole) {
-                    alert('Please select a role for the user.');
                     return false;
                 }
 
                 return true;
             }
 
-            // Enhanced role selection with visual feedback
             function initializeRoleSelection() {
-                const roleRadios = document.querySelectorAll('input[name="role"]');
-
                 roleRadios.forEach(radio => {
                     const card = radio.closest('.card-role');
-
-                    // Add click event to entire card
                     card.addEventListener('click', function(e) {
                         if (!radio.disabled) {
                             radio.checked = true;
+                            handleRoleChange(radio.value);
                             updateRoleSelectionUI();
                         }
                     });
 
-                    // Update UI when radio changes
-                    radio.addEventListener('change', function() {
-                        updateRoleSelectionUI();
-                    });
-
-                    // Initialize selected state
                     if (radio.checked) {
+                        handleRoleChange(radio.value);
                         card.classList.add('selected');
                     }
                 });
             }
 
-            // Update role selection UI
             function updateRoleSelectionUI() {
-                const roleCards = document.querySelectorAll('.card-role');
-
-                roleCards.forEach(card => {
+                document.querySelectorAll('.card-role').forEach(card => {
                     card.classList.remove('selected');
                 });
 
@@ -844,7 +1112,7 @@
                 }
             }
 
-            // Event listeners
+            // Initialize event listeners
             password.addEventListener('input', function() {
                 updatePasswordStrength();
                 checkPasswordMatch();
@@ -852,12 +1120,10 @@
 
             confirmPassword.addEventListener('input', checkPasswordMatch);
 
-            // DISE code input validation (numbers only)
             document.getElementById('dise_code').addEventListener('input', function(e) {
                 this.value = this.value.replace(/[^0-9]/g, '');
             });
 
-            // Form submission
             form.addEventListener('submit', function(event) {
                 if (!validateForm()) {
                     event.preventDefault();
@@ -865,15 +1131,12 @@
                     return false;
                 }
 
-                // Add loading state to submit button
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="bx bx-loader bx-spin me-2"></i> Processing...';
             });
 
-            // Initialize role selection
+            // Initialize
             initializeRoleSelection();
-
-            // Initialize password strength if password field has value
             if (password.value) {
                 updatePasswordStrength();
                 checkPasswordMatch();
