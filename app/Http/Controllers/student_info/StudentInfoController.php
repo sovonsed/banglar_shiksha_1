@@ -1227,12 +1227,7 @@ class StudentInfoController extends Controller
         ]);
     }
 
-    /* ============================================
-       GET → NORMAL PAGE LOAD / FETCH
 
-
-       
-    ============================================ */
     if (!$request->filled('student_code')) {
         return view(
             'src.modules.student_entry_update.Student_edit',
@@ -1253,10 +1248,10 @@ class StudentInfoController extends Controller
         ->first();
 
         
-    \Log::info('STUDENT FOUND ?', [
-        'student_code' => $studentCode,
-        'found' => $student_basic_info ? 'YES' : 'NO'
-    ]);
+    // \Log::info('STUDENT FOUND ?', [
+    //     'student_code' => $studentCode,
+    //     'found' => $student_basic_info ? 'YES' : 'NO'
+    // ]);
 
         // dd($student_basic_info);
 
@@ -1299,41 +1294,47 @@ class StudentInfoController extends Controller
             'student_height'              => $student_basic_info->stu_height_in_cms,
             'student_weight'              => $student_basic_info->stu_weight_in_kgs,
         ];
-        \Log::info('Student Basic Info', [
-            'student_code' => $studentCode,
-            'data' => $data
-        ]);
+
+        // \Log::info('Student Basic Info', [
+        //     'student_code' => $studentCode,
+        //     'data' => $data
+        // ]);
 
 
         /* ======================================================
            2. ================= Enrollment ======================
         ====================================================== */
-        // $student_enrollment_info = StudentEnrollmentInfo::where('school_id_fk', $schoolId)
-        //     ->where('student_code', $studentCode)
-        //     ->first();
+        $student_enrollment_info = StudentEnrollmentInfo::where('school_id_fk', $schoolId)
+            ->where('id', $studentCode)
+            ->first();
 
-        // if ($student_enrollment_info) {
-        //     $data['enrollment_info'] = [
-        //         'admission_no'             => $student_enrollment_info->admission_no,
-        //         'status_pre_year'          => $student_enrollment_info->status_pre_year,
-        //         'prev_class_appeared_exam' => $student_enrollment_info->prev_class_appeared_exam,
-        //         'prev_class_exam_result'   => $student_enrollment_info->prev_class_exam_result,
-        //         'prev_class_marks_percent' => $student_enrollment_info->prev_class_marks_percent,
-        //         'attendention_pre_year'    => $student_enrollment_info->attendention_pre_year,
-        //         'pre_class_code_fk'        => $student_enrollment_info->pre_class_code_fk,
-        //         'pre_section_code_fk'      => $student_enrollment_info->pre_section_code_fk,
-        //         'pre_stream_code_fk'       => $student_enrollment_info->pre_stream_code_fk,
-        //         'pre_roll_number'          => $student_enrollment_info->pre_roll_number,
-        //         'cur_class_code_fk'        => $student_enrollment_info->cur_class_code_fk,
-        //         'academic_year'            => $student_enrollment_info->academic_year,
-        //         'cur_section_code_fk'      => $student_enrollment_info->cur_section_code_fk,
-        //         'medium_code_fk'           => $student_enrollment_info->medium_code_fk,
-        //         'cur_roll_number'          => $student_enrollment_info->cur_roll_number,
-        //         'admission_date'           => $student_enrollment_info->admission_date,
-        //         'cur_stream_code'          => $student_enrollment_info->cur_stream_code_fk,
-        //         'admission_type_code_fk'   => $student_enrollment_info->admission_type_code_fk,
-        //     ];
-        // }
+        if ($student_enrollment_info) {
+            $data['enrollment_info'] = [
+                'admission_no'             => $student_enrollment_info->admission_no,
+                'status_pre_year'          => $student_enrollment_info->status_pre_year,
+                'prev_class_appeared_exam' => $student_enrollment_info->prev_class_appeared_exam,
+                'prev_class_exam_result'   => $student_enrollment_info->prev_class_exam_result,
+                'prev_class_marks_percent' => $student_enrollment_info->prev_class_marks_percent,
+                'attendention_pre_year'    => $student_enrollment_info->attendention_pre_year,
+                'pre_class_code_fk'        => $student_enrollment_info->pre_class_code_fk,
+                'pre_section_code_fk'      => $student_enrollment_info->pre_section_code_fk,
+                'pre_stream_code_fk'       => $student_enrollment_info->pre_stream_code_fk,
+                'pre_roll_number'          => $student_enrollment_info->pre_roll_number,
+                'cur_class_code_fk'        => $student_enrollment_info->cur_class_code_fk,
+                'academic_year'            => $student_enrollment_info->academic_year,
+                'cur_section_code_fk'      => $student_enrollment_info->cur_section_code_fk,
+                'medium_code_fk'           => $student_enrollment_info->medium_code_fk,
+                'cur_roll_number'          => $student_enrollment_info->cur_roll_number,
+                'admission_date'           => $student_enrollment_info->admission_date,
+                'cur_stream_code'          => $student_enrollment_info->cur_stream_code_fk,
+                'admission_type_code_fk'   => $student_enrollment_info->admission_type_code_fk,
+            ];
+        }
+\Log::info('Enrollment Info Only', [
+    'student_code' => $studentCode,
+    'enrollment_info' => $data['enrollment_info'] ?? null
+]);
+
 
         // /* ======================================================
         //    3. ================= Facility ========================
@@ -2172,4 +2173,209 @@ class StudentInfoController extends Controller
             return response()->json([]);
         }
     }
+// ===============================Student Edit===========Start================================================================
+
+    public function storeEnrollmentDetailsEdit(Request $request)
+  {
+        // dd($request->all());
+        try {
+            DB::beginTransaction();
+            $userId = Auth::user()->id ?? 1;
+
+            $inputMeta = [
+                'school_id_fk' => 1,
+                'entry_ip'     => request()->ip(),
+                'update_ip'    => request()->ip(),
+                'created_by'   => $userId,
+                'updated_by'   => $userId,
+            ];
+            // ['school_id_fk' => $inputMeta['school_id_fk']];
+            $enrollAttrs = [
+
+                'admission_no'              => $request->admission_number,
+                'status_pre_year'           => $request->admission_status_prev,
+                'prev_class_appeared_exam'  => $request->prev_class_appeared_exam,
+                'prev_class_exam_result'    => $request->previous_class_result_examination,
+                'prev_class_marks_percent'  => $request->percentage_of_overall_marks,
+                'attendention_pre_year'     => $request->no_of_days_attended,
+
+                'pre_class_code_fk'         => $request->previous_class,
+                'pre_section_code_fk'       => $request->class_section,
+                'pre_stream_code_fk'        => $request->student_stream,
+                'pre_roll_number'           => $request->previous_student_roll_no,
+
+                'cur_class_code_fk'         => $request->present_class,
+                'academic_year'             => $request->accademic_year,
+                'cur_section_code_fk'       => $request->present_section,
+                'medium_code_fk'            => $request->school_medium,
+                'cur_roll_number'           => $request->present_roll_no,
+                'admission_date'            => $request->admission_date_present,
+
+                'admission_type_code_fk'    => $request->admission_type,
+                'cur_stream_code_fk' => $request->cur_stream_code,
+
+                // meta
+                'school_id_fk'              => $inputMeta['school_id_fk'],
+                // 'entry_ip'                  => $inputMeta['entry_ip'],
+                // 'update_ip'                 => $inputMeta['update_ip'],
+                // 'created_by'                => $inputMeta['created_by'],
+                // 'updated_by'                => $inputMeta['updated_by'],
+            ];
+
+
+            $studentEnrollmentInfoData = array_merge($enrollAttrs, $inputMeta);
+            // dd($studentEnrollmentInfoData);
+
+            $enroll = StudentEnrollmentInfo::updateOrCreate(
+                ['school_id_fk' => $inputMeta['school_id_fk']],
+                $studentEnrollmentInfoData
+            );
+
+            DB::commit();
+            return response()->json([
+                'success'       => true,
+                'message'       => 'Enrollment saved successfully',
+                // 'enrollment_id' => $enroll->id,
+            ], 201);
+        } catch (\Illuminate\Database\QueryException $ex) {
+            DB::rollBack();
+
+            Log::error('SQL error saving enrollment', [
+                'error'   => $ex->getMessage(),
+                'trace'   => $ex->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error while saving enrollment',
+                'error'   => $ex->getMessage(),
+            ], 500);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            Log::error('Error saving enrollment', [
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error while saving enrollment',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
+    public function editStudentBasicDetails(Request $request)
+{
+    
+        // dd(request()->all());
+        try {
+            DB::beginTransaction();
+            $userId = Auth::user()->id ?? 1;
+
+            $inputMeta = [
+                'school_id_fk' => 1,
+                // 'entry_ip'     => request()->ip(),
+                // 'update_ip'    => request()->ip(),
+                'created_by'   => $userId,
+                'updated_by'   => $userId,
+            ];
+
+            //   ['school_id_fk' => $inputMeta['school_id_fk']];
+
+            $studentAttrs = [
+                'studentname'                          => $request->student_name,
+                'studentname_as_per_aadhaar'           => $request->student_name_as_per_aadhaar,
+                'gender_code_fk'                       => $request->gender,
+                'dob'                                  => $request->dob,
+                'fathername'                           => $request->father_name,
+                'mothername'                           => $request->mother_name,
+                'guardian_name'                        => $request->guardian_name,
+                'aadhaar_number'                       => $request->aadhaar_child,
+                'mothertonge_code_fk'                  => $request->mother_tongue,
+                'social_category_code_fk'              => $request->social_category,
+                'religion_code_fk'                     => $request->religion,
+                'nationality_code_fk'                  => $request->nationality,
+                'blood_group_code_fk'                  => $request->blood_group,
+                'bpl_y_n'                              => $request->bpl_beneficiary,
+                'bpl_aay_beneficiary_y_n'              => $request->antyodaya_anna_yojana,
+                'bpl_no'                               => $request->bpl_number,
+                'disadvantaged_group_y_n'              => $request->disadvantaged_group,
+                'cwsn_y_n'                             => $request->cwsn,
+                'cwsn_disability_type_code_fk'         => $request->type_of_impairment,
+                'disability_percentage'                => $request->disability_percentage,
+                'out_of_sch_child_y_n'                 => $request->out_of_school,
+                'child_mainstreamed'                   => $request->mainstreamed,
+                'birth_registration_number'            => $request->birth_reg_no,
+                'identification_mark'                  => $request->identification_mark,
+                'health_id'                            => $request->health_id,
+                'stu_guardian_relationship'            => $request->relationship_with_guardian,
+                'guardian_family_income'               => $request->family_income,
+                'guardian_qualification'               => $request->guardian_qualifications,
+                'stu_height_in_cms'                    => $request->student_height,
+                'stu_weight_in_kgs'                    => $request->student_weight,
+
+                // metadata
+                'school_id_fk'                         => $inputMeta['school_id_fk'],
+                // 'entry_ip'                             => $inputMeta['entry_ip'],
+                // 'update_ip'                            => $inputMeta['update_ip'],
+                'created_by'                           => $inputMeta['created_by'],
+                'updated_by'                           => $inputMeta['updated_by'],
+            ];
+
+
+
+
+            $studentInfoData = array_merge($studentAttrs, $inputMeta);
+
+
+            $basic_info_of_student = StudentInfo::updateOrCreate(
+                ['school_id_fk' => $inputMeta['school_id_fk']],
+                $studentInfoData
+            );
+
+            // dd($basic_info_of_student->toArray());
+
+            if ($basic_info_of_student) {
+                StudentEntryDraftTracker::updateOrCreate(
+                    [
+                        'school_id_fk' => $inputMeta['school_id_fk'],
+                        'step_number'  => 1,
+                    ],
+                    [
+                        'created_by' => $inputMeta['created_by'],
+                        'updated_by' => $inputMeta['updated_by'],
+                    ]
+                );
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success'    => true,
+                'message'    => 'Student saved successfully',
+            ], 201);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            Log::error('Error saving student', [
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error while saving student',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 }

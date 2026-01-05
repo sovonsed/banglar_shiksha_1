@@ -82,14 +82,27 @@ Route::middleware(['sso.auth', 'prevent.back'])->group(function () {
 
 
     Route::prefix('hoi')->group(function () {
-        // routes/web.php
+        // ===================Student Edit Start==========================================
+        Route::match(['get','post'], '/student-edit',
+        [StudentInfoController::class, 'getStudentEditDetailsByStudentCode']
+        )->name('student.edit');
+
+        Route::post(
+        '/student/edit-basic-details',
+        [StudentInfoController::class, 'editStudentBasicDetails']
+        )->name('student.edit_student_basic_details');
+
+        Route::post(
+        '/student/store-enrollment-details-edit',
+        [StudentInfoController::class, 'storeEnrollmentDetailsEdit']
+        )->name('student.store_enrollment_details_edit');
+
+
+
+
+        // ===================Student Edit End==========================================
         Route::get('/student-entry', [StudentInfoController::class, 'getStudentEntry'])->name('student.entry');
         // Route::get('/student-edit', [StudentInfoController::class, 'getStudentEditDetailsByStudentCode'])->name('student.edit');
-
-        Route::match(['get','post'], '/student-edit',
-    [StudentInfoController::class, 'getStudentEditDetailsByStudentCode']
-)->name('student.edit');
-
         Route::post('/save-student-facility-and-other-details', [StudentInfoController::class, 'storeStudentFacilityAndOtherDetails'])->name('hoi.student.facility');
         Route::post('/save-student-vocational-details', [StudentInfoController::class, 'saveVocationalDetails'])->name('save.vocational.details');
         Route::delete('/student-entry/reset', [StudentInfoController::class, 'resetEntry'])->name('student.entry.reset');

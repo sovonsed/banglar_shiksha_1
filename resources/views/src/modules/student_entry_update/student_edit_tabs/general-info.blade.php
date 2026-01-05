@@ -23,7 +23,8 @@
 
 <!-- =========TAB 1: Contact Info -- SUBHAJIT DAS--================================ -->
           <div class="tab-pane fade show active" id="general_info" role="tabpanel" aria-labelledby="general_info-tab">
-            <form id="basic_info_of_student" method="POST" action="{{ route('student.store_student_entry_basic_details') }}" novalidate>
+
+            <form id="Edit_of_basic_info_of_student" method="POST" action="{{ route('student.edit_student_basic_details') }}" novalidate>
 
               @csrf
               <h6 class=" card-header bg-heading-primary text-white py-2">
@@ -458,8 +459,144 @@
                 </div>
 
               <div class="form-actions text-end mt-3">
-                <button id="basic_info_save_btn" class="btn btn-success" type="button">Save Changes</button>
+                <button type="button"
+                        class="btn btn-success"
+                        data-bs-toggle="modal"
+                        data-bs-target="#confirmBasicInfoUpdateModal">
+                    Update
+                </button>
               </div>
             </form>
           </div>
+
+
+
+  <!-- ================= CONFIRM BASIC INFO UPDATE MODAL ================= -->
+<div class="modal fade" id="confirmBasicInfoUpdateModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+
+            <button type="button"
+                    class="btn-close position-absolute end-0 m-2"
+                    data-bs-dismiss="modal"></button>
+
+            <div class="text-center p-3">
+                <img src="{{ asset('images/logo/update_details_logo.png') }}"
+                     width="80" height="80">
+
+                <h5 class="fw-bold mt-2">Confirm Update</h5>
+
+                <p class="text-muted small mb-0">
+                    Are you sure you want to
+                    <strong>update basic details</strong> of this student?
+                </p>
+            </div>
+
+            <div class="modal-footer justify-content-center pt-0">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    No
+                </button>
+
+                <button type="button"
+                        class="btn btn-success"
+                        id="confirmBasicInfoUpdateBtn">
+                    Yes, Update
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="basicInfoSuccessModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+
+            <div class="text-center p-4">
+                <img src="{{ asset('images/logo/update_details_logo.png') }}"
+                     width="70" height="70">
+
+                <h5 class="fw-bold mt-3 text-success">
+                    Update Successful
+                </h5>
+
+                <p class="text-muted small">
+                    Basic details updated successfully.
+                </p>
+
+                <button type="button"
+                        class="btn btn-success"
+                        data-bs-dismiss="modal">
+                    OK
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ================= Failed MODAL ================= -->
+<div class="modal fade" id="BasicInfoFailedModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+
+            <div class="text-center p-4">
+                <img src="{{ asset('images/logo/update_details_logo.png') }}"
+                     width="70"
+                     height="70"
+                     alt="Failed">
+
+                <h5 class="fw-bold mt-3 text-danger">
+                    Update Failed
+                </h5>
+
+                <p class="text-muted small mb-3">
+                    Enrollment details Update Failed.
+                </p>
+
+                <button type="button"
+                        class="btn btn-danger px-4"
+                        data-bs-dismiss="modal">
+                    OK
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function () {
+
+    $('#confirmBasicInfoUpdateBtn').click(function () {
+
+        var form = $('#Edit_of_basic_info_of_student');
+        var url  = form.attr('action');
+        var data = form.serialize();
+
+        $('#confirmBasicInfoUpdateBtn').prop('disabled', true);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: data,
+            success: function () {
+
+                $('#confirmBasicInfoUpdateModal').modal('hide');
+                $('#basicInfoSuccessModal').modal('show');
+            },
+            error: function () {
+                alert('Error while saving basic details');
+            },
+            complete: function () {
+                $('#confirmBasicInfoUpdateBtn').prop('disabled', false);
+            }
+        });
+    });
+
+});
+</script>
+
 

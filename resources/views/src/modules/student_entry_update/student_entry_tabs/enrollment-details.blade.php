@@ -109,8 +109,8 @@
                       >
                     </div>
                   </div>
-                    <div class="mb-3" id="previous_class_studied" style="display:none;">
-                    <label class="form-label small">Grade/Class Studied in the Previous/Last Academic Year (Previous Class)*<span class="text-danger">*</span></label>
+                  <div class="mb-3" id="previous_class_studied" style="display:none;">
+                    <label class="form-label small">Grade/Class Studied in the Previous/Last Academic Year (Previous Class)<span class="text-danger">*</span></label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="bx bx-history"></i></span>
                       <select name="previous_class" id="previous_class" class="form-select">
@@ -124,7 +124,7 @@
                       </select>
                     </div>
                   </div>
-                    <div class="mb-3" id="previous_section_section" style="display:none;">
+                  <div class="mb-3" id="previous_section_section" style="display:none;">
                     <label class="form-label small">Previous Section<span class="text-danger">*</span></label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="bx bx-history"></i></span>
@@ -139,7 +139,7 @@
                       </select>
                     </div>
                   </div>
-                    <div class="mb-3" id="previous_stream_section" style="display:none;">
+                  <div class="mb-3" id="previous_stream_section" style="display:none;">
                     <label class="form-label small">Previous Stream<span class="text-danger">*</span></label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="bx bx-history"></i></span>
