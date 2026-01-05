@@ -34,13 +34,13 @@ class StudentDeleteDeacivateController extends Controller
                 $userSchool = $user->schoolMaster;
                 $query->where('school_code_fk', $userSchool->id)
                     ->where('status', 3);
-            } elseif ($roleName === 'Circle') {
-                // Circle officer → district + circle
-                $query->where('district_code_fk', $user->district_code_fk ?? 23)
-                    ->where('circle_code_fk', $user->circle_code_fk ?? 52);
+            } elseif ($roleName === 'SI') {
+                // SI officer → district + circle
+                $query->where('district_code_fk', $user->district_code_fk)
+                    ->where('circle_code_fk', $user->circle_code_fk);
             } elseif ($roleName === 'District Officer') {
                 // District officer → district only
-                $query->where('district_code_fk', $user->district_code_fk ?? 23);
+                $query->where('district_code_fk', $user->district_code_fk);
             }
             // dd($query);
             $deactive_students = $query->get();
@@ -111,9 +111,9 @@ class StudentDeleteDeacivateController extends Controller
                 // -------------------------------
                 // SI (CIRCLE OFFICER)
                 // -------------------------------
-            } elseif ($roleName === 'Circle') {
-                $query->where('district_code_fk', $user->district_code_fk ?? 23)
-                    ->where('circle_code_fk', $user->circle_code_fk ?? 52);
+            } elseif ($roleName === 'SI') {
+                $query->where('district_code_fk', $userSchool->district_code_fk)
+                    ->where('circle_code_fk', $userSchool->circle_code_fk);
                     if($searchPurpose === 2)
                     {
                         $query->where('status', 2);
@@ -127,7 +127,7 @@ class StudentDeleteDeacivateController extends Controller
                 // -------------------------------
             } elseif ($roleName === 'District Officer') {
 
-                $query->where('district_code_fk', $user->district_code_fk)
+                $query->where('district_code_fk', $userSchool->district_code_fk)
                     ->whereIn('status', [1,2,3]);
             }
             // dd($query);
@@ -205,13 +205,13 @@ class StudentDeleteDeacivateController extends Controller
                 $studentQuery->where('school_code_fk', $userSchool->id);
 
                 // CIRCLE OFFICER
-            } elseif ($roleName === 'Circle') {
-                $studentQuery->where('district_code_fk', $user->district_code_fk ?? 23)
-                    ->where('circle_code_fk', $user->circle_code_fk ?? 52);
+            } elseif ($roleName === 'SI') {
+                $studentQuery->where('district_code_fk', $user->district_code_fk)
+                    ->where('circle_code_fk', $user->circle_code_fk);
 
                 // DISTRICT OFFICER
             } elseif ($roleName === 'District Officer') {
-                $studentQuery->where('district_code_fk', $user->district_code_fk ?? 23);
+                $studentQuery->where('district_code_fk', $user->district_code_fk);
             }
 
             $student = $studentQuery->first();
@@ -278,10 +278,10 @@ class StudentDeleteDeacivateController extends Controller
     {
         try {
             $user = Auth::user();
-            // dd($user);
+            dd($user);
             $roleName = optional($user->roles()->first())->name;
             // dd($roleName);
-            $userSchool = $user->schoolMaster;
+            // dd($userSchool);
 
             // ----------------------------------
             // Base query
@@ -299,24 +299,25 @@ class StudentDeleteDeacivateController extends Controller
 
             // SCHOOL USER (HOI / School Admin)
             if (in_array($roleName, ['School Admin', 'HOI Primary']) && $userSchool) {
-
+                $userSchool = $user->schoolMaster;
                 $query->where('school_code_fk', $userSchool->id);
 
                 // CIRCLE OFFICER
-            } elseif ($roleName === 'Circle') { // keep typo if role name exists like this
+            } elseif ($roleName === 'SI') { // keep typo if role name exists like this
 
-                $query->where('district_code_fk', $user->district_code_fk ?? 23)
-                    ->where('circle_code_fk', $user->circle_code_fk ?? 52);
+                $query->where('district_code_fk', $user->district_code_fk)
+                    ->where('circle_code_fk', $user->circle_code_fk);
 
                 // DISTRICT OFFICER
             } elseif ($roleName === 'District Officer') {
 
-                $query->where('district_code_fk', $user->district_code_fk ?? 23);
+                $query->where('district_code_fk', $user->district_code_fk);
             }
 
             // ----------------------------------
             // Execute
             // ----------------------------------
+            dd($query);
             $deleted_students = $query->get();
 
             return view(
@@ -359,9 +360,9 @@ class StudentDeleteDeacivateController extends Controller
 
             if ($roleName === 'HOI Primary' && $userSchool) {
                 $studentQuery->where('school_code_fk', $userSchool->id);
-            } elseif ($roleName === 'Circle') {
-                    $studentQuery->where('district_code_fk', $user->district_code_fk ?? 23)
-                    ->where('circle_code_fk', $user->circle_code_fk ?? 52);
+            } elseif ($roleName === 'SI') {
+                    $studentQuery->where('district_code_fk', $user->district_code_fk)
+                    ->where('circle_code_fk', $user->circle_code_fk);
             }
 
             $student = $studentQuery->first();
@@ -414,7 +415,7 @@ class StudentDeleteDeacivateController extends Controller
             // =================================================
             // CASE 2️⃣ : SI REJECTS DELETE
             // =================================================
-            if ($roleName === 'Circle' && $data['status'] == 3) {
+            if ($roleName === 'SI' && $data['status'] == 3) {
 
                 DB::table('bs_student_master')
                     ->where('student_code', $student->student_code)
@@ -452,7 +453,7 @@ class StudentDeleteDeacivateController extends Controller
             // =================================================
             // CASE 3️⃣ : SI APPROVES DELETE
             // =================================================
-            if ($roleName === 'Circle' && $data['status'] == 2) {
+            if ($roleName === 'SI' && $data['status'] == 2) {
 
                 // -------- ARCHIVE
                 DB::statement("

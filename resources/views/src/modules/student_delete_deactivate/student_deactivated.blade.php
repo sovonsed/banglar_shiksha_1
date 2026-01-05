@@ -75,7 +75,7 @@
                             <th>Present Roll No.</th>
                             <th>Deactivation Reason</th>
                             @if(optional($user->roles()->first())->name ===
-                            'Circle')
+                            'SI')
                             <th>Action</th>
                             @endif
                         </tr>
@@ -115,7 +115,7 @@
                             </td>
                             <td>{{ $student->deleteReason->name ?? 'N/A' }}</td>
                             @if(optional($user->roles()->first())->name ===
-                            'Circle')
+                            'SI')
                             <td>
                                 <button
                                     type="button"
@@ -260,7 +260,7 @@
     function populateStudentRow(d) {
       let actionTd = '';
 
-      if (USER_ROLE === 'Circle') {
+      if (USER_ROLE === 'SI') {
 
           actionTd = `
               <td>
@@ -357,8 +357,8 @@
             title: 'Deactivate',
             message: 'Do you really want to deactivate this student?',
             confirmText: 'Deactivate'
-        }).then(ok => {
-            if (ok) {
+        }).then(confirmed  => {
+            if (confirmed ) {
             let $btn = $(this);
             $btn.prop('disabled', true).text('Deactivating...');
 
@@ -418,8 +418,8 @@
             title: 'Activate',
             message: 'Do you really want to activate this student deletion?',
             confirmText: 'Reject'
-        }).then(ok => {
-            if (ok) {
+        }).then(confirmed  => {
+            if (confirmed ) {
             let $btn = $(this);
             $btn.prop('disabled', true).text('Activating...');
 

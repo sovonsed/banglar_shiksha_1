@@ -125,7 +125,7 @@ async function sendRequest(url, method = "POST", formSelector = null, extraData 
         return null;
     }
 }
-function showAlert({
+function showAlert_({
     type = 'info',     // success | error | warning | info | validation
     message = '',
     messages = []
@@ -200,6 +200,99 @@ function showAlert({
             .off('hidden.bs.modal')
             .one('hidden.bs.modal', function () {
                 resolve(true);
+            });
+
+        modal.show();
+    });
+}
+function showAlert({
+    type = 'info',     // success | error | warning | info | validation | confirm
+    message = '',
+    messages = []
+}) {
+    return new Promise(resolve => {
+
+        let action = null; // <-- track user intent
+
+        const config = {
+            success:    { label: 'SUCCESS',    icon: 'bx-check-circle', bg: 'bg-success', text: 'text-success' },
+            error:      { label: 'ERROR',      icon: 'bx-error',        bg: 'bg-danger',  text: 'text-danger' },
+            warning:    { label: 'WARNING',    icon: 'bx-error-circle', bg: 'bg-warning', text: 'text-dark'  },
+            info:       { label: 'INFO',       icon: 'bx-info-circle',  bg: 'bg-info',    text: 'text-primary' },
+            validation: { label: 'VALIDATION', icon: 'bx-shield-x',     bg: 'bg-danger',  text: 'text-danger' },
+            confirm:    { label: 'CONFIRM',    icon: 'bx-help-circle',  bg: 'bg-secondary', text: 'text-dark' }
+        };
+
+        if (!config[type]) type = 'info';
+
+        const $modal  = $('#globalAlertModal');
+        const modal   = new bootstrap.Modal($modal[0], {
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        const $header = $('#globalAlertHeader');
+        const $title  = $('#globalAlertTitle');
+        const $icon   = $('#globalAlertIcon');
+        const $type   = $('#globalAlertType');
+        const $msg    = $('#globalAlertMessage');
+        const $list   = $('#globalAlertList');
+
+        const $okBtn      = $('#globalAlertOkBtn');
+        const $cancelBtn  = $('#globalAlertCancelBtn');
+        const $confirmBtn = $('#globalAlertConfirmBtn');
+
+        /* ========= RESET ========= */
+        $header.removeClass('bg-success bg-danger bg-warning bg-info bg-secondary');
+        $title.removeClass('text-white text-dark text-success text-danger text-primary');
+
+        $okBtn.addClass('d-none').off('click');
+        $cancelBtn.addClass('d-none').off('click');
+        $confirmBtn.addClass('d-none').off('click');
+
+        $list.addClass('d-none').empty();
+
+        /* ========= APPLY TYPE ========= */
+        const { label, icon, bg, text } = config[type];
+
+        $header.addClass(bg);
+        $title.text(label);
+
+        $icon.attr('class', `bx ${icon} fs-1 ${text}`);
+        $type.attr('class', `fw-bold ${text}`).text(label);
+        $msg.text(message);
+
+        if (messages.length) {
+            $list.removeClass('d-none');
+            messages.forEach(m => $('<li>').text(m).appendTo($list));
+        }
+
+        /* ========= MODES ========= */
+        if (type === 'warning') {
+
+            $cancelBtn.removeClass('d-none').on('click', () => {
+                action = false;
+                modal.hide();
+            });
+
+            $confirmBtn.removeClass('d-none').on('click', () => {
+                action = true;
+                modal.hide();
+            });
+
+        } else {
+
+            $okBtn.removeClass('d-none').on('click', () => {
+                action = true;
+                modal.hide();
+            });
+        }
+
+        /* ========= FINAL RESOLVE ========= */
+        $modal
+            .off('hidden.bs.modal')
+            .one('hidden.bs.modal', () => {
+                resolve(action);   // <-- ONLY resolves what user actually did
             });
 
         modal.show();

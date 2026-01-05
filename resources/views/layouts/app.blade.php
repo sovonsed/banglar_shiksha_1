@@ -100,7 +100,7 @@
 
       <div class="modal-header" id="globalAlertHeader">
         <h5 class="modal-title" id="globalAlertTitle"></h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        {{-- <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button> --}}
       </div>
 
     <div class="modal-body text-center">
