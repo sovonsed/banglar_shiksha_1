@@ -13,7 +13,7 @@
   <div class="page-header mb-3 d-flex justify-content-between align-items-center">
     <h5 class="fw-bold mb-0">Search Student for Deletion</h5>
   </div>
-    @include('src.modules.student_delete_deactivate.student_search')
+    @include('src.modules.search_student.student_search')
 @endif
  <!-- Table card -->
 <div class="card card-full mb-4">

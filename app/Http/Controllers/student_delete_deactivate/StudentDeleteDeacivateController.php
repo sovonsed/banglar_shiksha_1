@@ -18,6 +18,7 @@ class StudentDeleteDeacivateController extends Controller
     {
         try {
             $user = Auth::user();
+            // dd($user);
             $user_role_info = user_roles_map();
             $roleName       = $user_role_info['role_name'];
             $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
@@ -26,6 +27,7 @@ class StudentDeleteDeacivateController extends Controller
             $circle_id      = $scope['circle_code_fk'] ?? null;
             $management_id  = $scope['school_management_code_fk'] ?? null;
             $school_id      = $scope['school_code_fk'] ?? null;
+            // dd($school_id);
             // dd($roleName);
             $query = StudentDeactivateModel::query()
                 ->with([
@@ -63,7 +65,6 @@ class StudentDeleteDeacivateController extends Controller
             ], 500);
         }
     }
-
     public function searchStudentByStudentCode(Request $request)
     {
         try {
@@ -76,7 +77,7 @@ class StudentDeleteDeacivateController extends Controller
             $circle_id      = $scope['circle_code_fk'] ?? null;
             $management_id  = $scope['school_management_code_fk'] ?? null;
             $school_id      = $scope['school_code_fk'] ?? null;
-            dd($school_id);
+            // dd($school_id);
 
             // -------------------------------
             // Validation
@@ -141,7 +142,7 @@ class StudentDeleteDeacivateController extends Controller
                 $query->where('district_code_fk', $district_id)
                     ->whereIn('status', [1,2,3]);
             }
-            dd($query);
+            // dd($query);
             $student = $query->first();
             // dd($student);
 
@@ -186,7 +187,6 @@ class StudentDeleteDeacivateController extends Controller
             ], 500);
         }
     }
-
     public function deactivateStudent(Request $request)
     {
         try {
@@ -287,13 +287,13 @@ class StudentDeleteDeacivateController extends Controller
             ], 500);
         }
     }
-
     // =========================Deactivated Students View & Deactivate Student End==========================
     // =========================Deleted Students View & Delete Student Start================================
     public function deletedStudentView()
     {
         try {
             $user = Auth::user();
+            // dd($user);
             $user_role_info = user_roles_map();
             $roleName       = $user_role_info['role_name'];
             $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
@@ -352,7 +352,6 @@ class StudentDeleteDeacivateController extends Controller
             ], 500);
         }
     }
-
     public function deleteStudent(Request $request)
     {
         try {
@@ -899,9 +898,5 @@ class StudentDeleteDeacivateController extends Controller
             ], 500);
         }
     }
-
-
-
-
     // =========================Deleted Students View & Delete Student Ens==================================
 }

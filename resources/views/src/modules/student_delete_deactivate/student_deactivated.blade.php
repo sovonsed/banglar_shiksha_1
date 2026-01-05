@@ -10,7 +10,7 @@
     >
         <h5 class="fw-bold mb-0">Search Student for Dectivation</h5>
 </div>
-        @include('src.modules.student_delete_deactivate.student_search')
+        @include('src.modules.search_student.student_search')
     @endif
     <!-- Table card -->
     <div class="card card-full mb-4">

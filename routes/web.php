@@ -12,6 +12,7 @@ use App\Http\Controllers\AccessControl\ModuleController;
 use App\Http\Controllers\student_info\StudentInfoController;
 
 use App\Http\Controllers\student_delete_deactivate\StudentDeleteDeacivateController;
+use App\Http\Controllers\search_student\SearchStudentController;
 
 // use App\Http\Controllers\AccessControl\PermissionController;
 // use App\Http\Controllers\AccessControl\RoleController;
@@ -274,7 +275,7 @@ Route::middleware(['sso.auth', 'prevent.back'])->group(function () {
     });
     Route::prefix('student')->group(function () {
         Route::get('/student-deactivate', [StudentDeleteDeacivateController::class, 'deactivateStudentView'])->name('student.deactivate.view');
-        Route::post('/student-search-by-student-code', [StudentDeleteDeacivateController::class, 'searchStudentByStudentCode'])->name('search.student.by.student_code');
+        Route::post('/student-search-by-student-code', [SearchStudentController::class, 'searchStudentByStudentCode'])->name('search.student.by.student_code');
         Route::post('/deactivate', [StudentDeleteDeacivateController::class, 'deactivateStudent'])->name('student.deactivate');
         Route::get('/delete/list', [StudentDeleteDeacivateController::class, 'deletedStudentView'])->name('student.delete.view');
         Route::post('/delete', [StudentDeleteDeacivateController::class, 'deleteStudent'])->name('student.delete');
