@@ -1510,11 +1510,11 @@ class StudentInfoController extends Controller
             // Get user's school information if available
             // ===============================
             $userSchool = $user->schoolMaster ?? null;
-            $isSchoolUser = $user_role_info['is_school_user'] && $userSchool ? true : false;
+            $isSchoolUser = $user_role_info['is_hoi_pe'] && $userSchool ? true : false;
 
             // For circle officers, get their circle
             $userCircle = null;
-            if ($user_role_info['is_circle_officer']) {
+            if ($user_role_info['is_si_officer']) {
                 $userCircle = $user ?? null;
             }
 
@@ -1537,7 +1537,7 @@ class StudentInfoController extends Controller
             //     $subdivision_id = $userSchool->subdivision_code_fk;
             //     $school_id = $userSchool->id;
             //     $management_id = $userSchool->school_management_code_fk;
-            // } elseif ($user_role_info['is_circle_officer'] && $userCircle) {
+            // } elseif ($user_role_info['is_si_officer'] && $userCircle) {
             //     // Circle officers - restrict to their circle
             //     $circle_id = $userCircle->id ?? 66;
             //     $circle_id = 66;
@@ -1559,7 +1559,7 @@ class StudentInfoController extends Controller
             // ===============================
             // Decrypt IDs safely (respecting role restrictions)
             // ===============================
-            if (!$user_role_info['is_school_user'] && !$user_role_info['is_circle_officer']) {
+            if (!$user_role_info['is_school_user'] && !$user_role_info['is_si_officer']) {
                 // Only allow filter changes for Super Admin
                 foreach (['district_id', 'subdivision_id', 'circle_id', 'management_id', 'school_id'] as $field) {
                     if ($request->filled($field)) {
@@ -1604,7 +1604,7 @@ class StudentInfoController extends Controller
                     ->where('status', 1)
                     ->select('id', 'name')
                     ->get();
-            } elseif ($user_role_info['is_circle_officer'] && $userCircle) {
+            } elseif ($user_role_info['is_si_officer'] && $userCircle) {
                 // Circle officers see data within their circle
                 $data['districts'] = DistrictMaster::where('id', $district_id)
                     ->where('status', 1)
@@ -1696,7 +1696,7 @@ class StudentInfoController extends Controller
                     ->distinct()
                     ->orderBy('academic_year', 'desc')
                     ->pluck('academic_year');
-            } elseif ($user_role_info['is_circle_officer'] && $circle_id) {
+            } elseif ($user_role_info['is_si_officer'] && $circle_id) {
                 $data['academic_years'] = StudentMaster::where('circle_code_fk', $circle_id)
                     ->select('academic_year')
                     ->distinct()
@@ -1728,7 +1728,7 @@ class StudentInfoController extends Controller
             if ($user_role_info['is_school_user'] && $school_id) {
                 // School users can only see their own school's students
                 $query->where('school_code_fk', $school_id);
-            } elseif ($user_role_info['is_circle_officer'] && $circle_id) {
+            } elseif ($user_role_info['is_si_officer'] && $circle_id) {
                 // Circle officers can only see students in their circle
                 $query->where('circle_code_fk', $circle_id);
 
@@ -1831,7 +1831,7 @@ class StudentInfoController extends Controller
             if ($user_role_info['is_school_user'] && $school_id) {
                 // School users statistics only for their school
                 $statsBaseQuery = StudentMaster::where('school_code_fk', $school_id);
-            } elseif ($user_role_info['is_circle_officer'] && $circle_id) {
+            } elseif ($user_role_info['is_si_officer'] && $circle_id) {
                 // Circle officers statistics for their circle
                 $statsBaseQuery = StudentMaster::where('circle_code_fk', $circle_id);
 
