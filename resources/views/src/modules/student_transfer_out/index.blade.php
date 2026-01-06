@@ -15,7 +15,7 @@
     <!-- Table card -->
     <div class="card card-full mb-4">
         <div class="custom-header-data-table">
-            <span class="fw-semibold">Deactivated Student's List</span>
+            <span class="fw-semibold">Transferred Student's List</span>
 
             <div class="btn-group float-end">
                 <button
@@ -70,10 +70,6 @@
                             <th>Name</th>
                             <th>DOB</th>
                             <th>Guardian Name</th>
-                            <th>Present Class</th>
-                            <th>Present Section</th>
-                            <th>Present Roll No.</th>
-                            <th>Deactivation Reason</th>
                             @if(optional($user->roles()->first())->name ===
                             'SI')
                             <th>Action</th>
@@ -223,34 +219,8 @@
       const USER_ROLE = @json(optional($user->roles()->first())->name);
       let DEACTIVATION_REASONS = [];
       $("#search_purpose").val('1');
-    let SELECTED_STUDENT_CODE = null;
+      /* Fetch reasons only once */
 
-    /* Load reasons once */
-    function loadDeactivateReasons() {
-        return sendRequest(
-            "{{ route('get.reason.for.deactivation') }}",
-            "GET"
-        ).then(res => {
-            DEACTIVATION_REASONS = (res.status && Array.isArray(res.data))
-                ? res.data
-                : [];
-            populateDeactivateReasonDropdown();
-        });
-    }
-
-    function populateDeactivateReasonDropdown() {
-        let options = `<option value="">Select Reason</option>`;
-
-        if (DEACTIVATION_REASONS.length) {
-            DEACTIVATION_REASONS.forEach(r => {
-                options += `<option value="${r.id}">${r.name}</option>`;
-            });
-        } else {
-            options += `<option value="">No reasons available</option>`;
-        }
-
-        $("#deactivation_reason").html(options);
-    }
     function populateStudentRow(d) {
 
         // safety check
@@ -280,164 +250,56 @@
         $("#student_result_body").html(row);
 
         // show deactivate card (HOI Primary flow)
-        $("#deactivate_details_card").removeClass('d-none');
+        if (USER_ROLE === 'HOI Primary') {
+            $("#transfer_out_details_card").removeClass('d-none');
+        } else {
+            $("#transfer_out_details_card").addClass('d-none');
+        }
     }
+    function showEmptyRow(message) {
+        $("#student_result_body").html(`
+            <tr>
+                <td colspan="10" class="text-center text-danger">
+                    ${message}
+                </td>
+            </tr>
+        `);
+    }
+$("#btn_search_student").on("click", function (e) {
+    e.preventDefault();
 
-    /* call once on page load */
-    loadDeactivateReasons();
+    if (!validateRequiredFields("#student_search_form")) return;
 
-    $("#btn_search_student").on("click", function (e) {
-        e.preventDefault();
+    const $btn = $(this).prop('disabled', true).text('Searching...');
 
-        if (!validateRequiredFields("#student_search_form")) return;
+    sendRequest(
+        "{{ route('search.student.by.student_code') }}",
+        "POST",
+        "#student_search_form"
+    )
+    .then(res => {
+        if (res.status) {
 
-        const $btn = $(this).prop('disabled', true).text('Searching...');
+            SELECTED_STUDENT_CODE = res.data.student_code;
+            $("#selected_student_code").val(SELECTED_STUDENT_CODE);
 
-        sendRequest(
-            "{{ route('search.student.by.student_code') }}",
-            "POST",
-            "#student_search_form"
-        )
-        .then(res => {
-            if (res.status) {
+            populateStudentRow(res.data);
 
-                SELECTED_STUDENT_CODE = res.data.student_code;
-                $("#selected_student_code").val(SELECTED_STUDENT_CODE);
-
-                populateStudentRow(res.data);
-
-                $("#deactivate_details_card").removeClass('d-none');
-            } else {
-                SELECTED_STUDENT_CODE = null;
-                $("#deactivate_details_card").addClass('d-none');
-                showEmptyRow(res.message || 'Student not found');
-            }
-        })
-        .catch(() => {
+        } else {
             SELECTED_STUDENT_CODE = null;
-            $("#deactivate_details_card").addClass('d-none');
-            showEmptyRow('Something went wrong');
-        })
-        .finally(() => {
-            $btn.prop('disabled', false).text('Search');
-        });
-    });
-
-    $(document).on('click', '#btn_deactivate_student', function () {
-
-        if (!SELECTED_STUDENT_CODE) {
-            showAlert({ type: 'info', message: 'Search a student first.' });
-            return;
+            $("#delete_details_card").addClass('d-none');
+            showEmptyRow(res.message || 'Student not found');
         }
-
-        const deactivate_reason_code_fk = $("#deactivation_reason").val();
-
-        if (!deactivate_reason_code_fk) {
-            showAlert({
-                type: 'info',
-                message: 'Please select a deactivation reason.'
-            });
-            return;
-        }
-
-        showAlert({
-            type: 'warning',
-            title: 'Deactivate Student',
-            message: 'Do you really want to deactivate this student?',
-            confirmText: 'Deactivate'
-        }).then(confirmed => {
-
-            if (!confirmed) return;
-
-            const $btn = $(this).prop('disabled', true).text('Deactivating...');
-
-            sendRequest(
-                "{{ route('student.deactivate') }}",
-                "POST",
-                null,
-                {
-                    student_code: SELECTED_STUDENT_CODE,
-                    deactivate_reason_code_fk,
-                    _token: "{{ csrf_token() }}"
-                }
-            )
-            .then(res => {
-                if (res.status) {
-                    showAlert({
-                        type: 'success',
-                        message: res.message
-                    }).then(() => location.reload());
-                } else {
-                    showAlert({
-                        type: 'error',
-                        message: res.message || 'Deactivation failed'
-                    });
-                }
-            })
-            .catch(() => {
-                showAlert({
-                    type: 'error',
-                    message: 'Something went wrong'
-                });
-            })
-            .finally(() => {
-                $btn.prop('disabled', false).text('Deactivate');
-            });
-        });
+    })
+    .catch(() => {
+        SELECTED_STUDENT_CODE = null;
+        $("#delete_details_card").addClass('d-none');
+        showEmptyRow('Something went wrong');
+    })
+    .finally(() => {
+        $btn.prop('disabled', false).text('Search');
     });
-
-    $(document).on('click', '#btn_activate_student', function () {
-
-        if (!SELECTED_STUDENT_CODE) {
-            showAlert({ type: 'info', message: 'Search a student first.' });
-            return;
-        }
-
-        showAlert({
-            type: 'warning',
-            title: 'Activate Student',
-            message: 'Do you really want to activate this student?',
-            confirmText: 'Activate'
-        }).then(confirmed => {
-
-            if (!confirmed) return;
-
-            const $btn = $(this).prop('disabled', true).text('Activating...');
-
-            sendRequest(
-                "{{ route('student.activate') }}",
-                "POST",
-                null,
-                {
-                    student_code: SELECTED_STUDENT_CODE,
-                    _token: "{{ csrf_token() }}"
-                }
-            )
-            .then(res => {
-                if (res.status) {
-                    showAlert({
-                        type: 'success',
-                        message: res.message
-                    }).then(() => location.reload());
-                } else {
-                    showAlert({
-                        type: 'error',
-                        message: res.message || 'Activation failed'
-                    });
-                }
-            })
-            .catch(() => {
-                showAlert({
-                    type: 'error',
-                    message: 'Something went wrong'
-                });
-            })
-            .finally(() => {
-                $btn.prop('disabled', false).text('Activate');
-            });
-        });
-    });
-
+});
     });
 </script>
 @endpush

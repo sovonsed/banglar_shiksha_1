@@ -22,6 +22,7 @@ use App\Http\Controllers\{
     TeacherManagementController,
     SiController,
 };
+use App\Http\Controllers\student_transfer_in_and_out\StudentTransferOutController;
 
 // SSO Authentication Routes
 Route::middleware(['prevent.back'])->group(function () {
@@ -273,13 +274,14 @@ Route::middleware(['sso.auth', 'prevent.back'])->group(function () {
         Route::get('/total-teacher', [SiController::class, 'totalTeacher'])->name('si.total_teacher');
         Route::get('/school-class-gender-wise-enrollment', [SiController::class, 'schoolClassGenderWiseEnrollmentReport'])->name('si.school_class_gender_wise_enrollment_report');
     });
-    Route::prefix('student')->group(function () {
+    Route::prefix('student')->name('student.')->group(function () {
         Route::get('/student-deactivate', [StudentDeleteDeacivateController::class, 'deactivateStudentView'])->name('student.deactivate.view');
         Route::post('/student-search-by-student-code', [SearchStudentController::class, 'searchStudentByStudentCode'])->name('search.student.by.student_code');
         Route::post('/deactivate', [StudentDeleteDeacivateController::class, 'deactivateStudent'])->name('student.deactivate');
         Route::get('/delete/list', [StudentDeleteDeacivateController::class, 'deletedStudentView'])->name('student.delete.view');
         Route::post('/delete', [StudentDeleteDeacivateController::class, 'deleteStudent'])->name('student.delete');
         Route::post('/activate', [StudentDeleteDeacivateController::class, 'activateStudent'])->name('student.activate');
+        Route::resource('transferout', StudentTransferOutController::class);
 
     });
 

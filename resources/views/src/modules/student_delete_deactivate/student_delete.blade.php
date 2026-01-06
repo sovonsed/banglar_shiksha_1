@@ -235,348 +235,268 @@
 <script>
     $(document).ready(function () {
         const USER_ROLE = @json(optional($user->roles()->first())->name);
+      $("#search_purpose").val('1');
+       let SELECTED_STUDENT_CODE = null;
         let DELETE_REASONS = [];
+
         $("#search_purpose").val('2');
-        loadDeleteReasons();
-        /* Fetch reasons only once */
-        function   loadDeleteReasons() {
+
+        /* load once */
+        function loadDeleteReasons() {
             return sendRequest(
                 "{{ route('get.reason.for.deletion') }}",
                 "GET"
-            )
-            .then(res => {
-                if (res.status && Array.isArray(res.data)) {
-                    DELETE_REASONS = res.data;   // 
-                } else {
-                    DELETE_REASONS = [];
-                }
-                return DELETE_REASONS;
-            })
-            .catch(err => {
-                console.error(err);
-                DELETE_REASONS = [];
-                return [];
+            ).then(res => {
+                DELETE_REASONS = (res.status && Array.isArray(res.data))
+                    ? res.data
+                    : [];
+                populateDeleteReasons();
             });
         }
-        function buildDeleteReasonOptions() {
+
+        function populateDeleteReasons() {
             let options = `<option value="">Select Reason</option>`;
 
-            if (DELETE_REASONS.length > 0) {
-                DELETE_REASONS.forEach(item => {
-                    options += `<option value="${item.id}">${item.name}</option>`;
+            if (DELETE_REASONS.length) {
+                DELETE_REASONS.forEach(r => {
+                    options += `<option value="${r.id}">${r.name}</option>`;
                 });
             } else {
                 options += `<option value="">No reasons available</option>`;
             }
 
-            return options;
+            $("#delete_reason").html(options);
         }
-        function populateStudentRow(d) {
-            let actionTd = '';
+    function populateStudentRow(d) {
 
+        // safety check
+        if (!d || !d.student_code) {
+            showEmptyRow('Invalid student data');
+            return;
+        }
+
+        // store globally (card-based flow)
+        SELECTED_STUDENT_CODE = d.student_code;
+        $("#selected_student_code").val(d.student_code);
+
+        const row = `
+            <tr>
+                <td class="student-code" data-student-code="${d.student_code}">
+                    ${d.student_code}
+                </td>
+                <td>${d.studentname ?? '-'}</td>
+                <td>${d.dob ?? '-'}</td>
+                <td>${d.guardian_name ?? '-'}</td>
+                <td>${d.current_class ?? '-'}</td>
+                <td>${d.current_section ?? '-'}</td>
+                <td>${d.cur_roll_number ?? '-'}</td>
+            </tr>
+        `;
+
+        $("#student_result_body").html(row);
+
+        // show deactivate card (HOI Primary flow)
+            $("#delete_details_card").removeClass('d-none');
+    }
+        loadDeleteReasons();
+
+$("#btn_search_student").on("click", function (e) {
+    e.preventDefault();
+
+    if (!validateRequiredFields("#student_search_form")) return;
+
+    const $btn = $(this).prop('disabled', true).text('Searching...');
+
+    sendRequest(
+        "{{ route('search.student.by.student_code') }}",
+        "POST",
+        "#student_search_form"
+    )
+    .then(res => {
+        if (res.status) {
+
+            SELECTED_STUDENT_CODE = res.data.student_code;
+            $("#selected_student_code").val(SELECTED_STUDENT_CODE);
+
+            populateStudentRow(res.data);
+
+
+            // role-based section
+            $("#delete_hoi_section, #delete_si_section").addClass('d-none');
+
+            if (USER_ROLE === 'HOI Primary') {
+                $("#delete_hoi_section").removeClass('d-none');
+            }
             if (USER_ROLE === 'SI') {
-
-                actionTd = `
-                    <td>
-                        <div class="row g-2">
-                            <div class="col-6 text-center">
-                                <button type="button"
-                                    class="btn btn-warning btn-sm w-100 btn-reject" data-status="3" data-student-code="${d.student_code}">
-                                    <i class="bx bx-x"></i> Reject
-                                </button>
-                            </div>
-                            <div class="col-6 text-center">
-                                <button type="button"
-                                    class="btn btn-success btn-sm w-100 btn-approve" data-status="2" data-student-code="${d.student_code}">
-                                    <i class="bx bx-check-circle"></i> Approve
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                `;
+                $("#delete_si_section").removeClass('d-none');
             }
-            else if (USER_ROLE === 'HOI Primary') {
 
-                actionTd = `
-                    <td>
-                        <select class="form-select form-select-sm delete-reason"
-                                data-student-code="${d.student_code}">
-                            ${buildDeleteReasonOptions()}
-                        </select>
-                    </td>
-                    <td>
-                        <button type="button"
-                            class="btn btn-info w-100 btn-send-to-si" data-student-code="${d.student_code}" data-status="1">
-                            <i class="bx bx-check-circle"></i> Send to SI
-                        </button>
-                        
-                    </td>
-                `;
+        } else {
+            SELECTED_STUDENT_CODE = null;
+            $("#delete_details_card").addClass('d-none');
+            showEmptyRow(res.message || 'Student not found');
+        }
+    })
+    .catch(() => {
+        SELECTED_STUDENT_CODE = null;
+        $("#delete_details_card").addClass('d-none');
+        showEmptyRow('Something went wrong');
+    })
+    .finally(() => {
+        $btn.prop('disabled', false).text('Search');
+    });
+});
 
+$(document).on('click', '#btn_send_to_si', function () {
+
+    if (!SELECTED_STUDENT_CODE) {
+        showAlert({ type: 'info', message: 'Search a student first.' });
+        return;
+    }
+
+    const delete_reason_code_fk = $("#delete_reason").val();
+
+    if (!delete_reason_code_fk) {
+        showAlert({
+            type: 'info',
+            message: 'Please select a delete reason.'
+        });
+        return;
+    }
+
+    showAlert({
+        type: 'warning',
+        title: 'Send to SI',
+        message: 'Do you want to send this deletion request to SI?',
+        confirmText: 'Send'
+    }).then(confirmed => {
+
+        if (!confirmed) return;
+
+        const $btn = $(this).prop('disabled', true).text('Sending...');
+
+        sendRequest(
+            "{{ route('student.delete') }}",
+            "POST",
+            null,
+            {
+                student_code: SELECTED_STUDENT_CODE,
+                delete_reason_code_fk,
+                status: 1,
+                _token: "{{ csrf_token() }}"
+            }
+        )
+        .then(res => {
+            if (res.status) {
+                showAlert({
+                    type: 'success',
+                    message: res.message
+                }).then(() => location.reload());
             } else {
-
-                actionTd = `
-                    <td>
-                        <span class="text-muted">No Action</span>
-                    </td>
-                `;
-            }
-
-            let row = `
-                <tr>
-                    <td class="student-code" data-student-code="${d.student_code}">
-                        ${d.student_code}
-                    </td>
-                    <td>${d.studentname ?? '-'}</td>
-                    <td>${d.dob ?? '-'}</td>
-                    <td>${d.guardian_name ?? '-'}</td>
-                    <td>${d.current_class ?? '-'}</td>
-                    <td>${d.current_section ?? '-'}</td>
-                    <td>${d.cur_roll_number ?? '-'}</td>
-                    ${actionTd}
-                </tr>
-            `;
-
-            $("#student_result_body").html(row); // replace existing rows
-        }
-        function showEmptyRow(message) {
-            $("#student_result_body").html(`
-                <tr>
-                    <td colspan="10" class="text-center text-danger">
-                        ${message}
-                    </td>
-                </tr>
-            `);
-        }
-        $("#btn_search_student").on("click", function (e) {
-            if (!validateRequiredFields("#student_search_form")) {
-                return;
-            }
-
-            let $btn = $(this);
-            $btn.prop('disabled', true).text('Searching...');
-
-            let url = "{{ route('search.student.by.student_code') }}";
-
-            sendRequest(url, "POST", "#student_search_form")
-                .then(res => {
-
-                    $btn.prop('disabled', false).text('Search');
-
-                    if (res.status) {
-                        populateStudentRow(res.data);
-                    } else {
-                        showEmptyRow(res.message || 'Student not found');
-                    }
-                })
-                .catch(err => {
-                    $btn.prop('disabled', false).text('Search');
-                    showEmptyRow('Something went wrong');
-            });
-        });
-        $(document).on('click', '.btn-send-to-si', function (e) {
-            e.preventDefault();
-            showAlert({
-                type: 'warning',
-                title: 'Delete Student',
-                message: 'Do you really want to delete this student?',
-                confirmText: 'Delete'
-            }).then(confirmed  => {
-                if (confirmed ) {
-                let $btn = $(this);
-                $btn.prop('disabled', true).text('Processing...');
-
-                // collect values (example: from hidden inputs)
-                let student_code = $(this).data('student-code');
-                let status = $(this).data('status');
-
-                let delete_reason_code_fk = $('select.delete-reason').val();
-
-                if (!delete_reason_code_fk) {
-                    showAlert({
-                            type: 'info',
-                            message: 'Please select a delete reason.'
-                        }).then(ok => {
-                            if (ok) {
-                                goNext();
-                            }
-                        });
-                                        
-                        $btn.prop('disabled', false).html('<i class="bx bx-check-circle"></i> Send to SI');
-                    return;
-                }
-                let url = "{{ route('student.delete') }}";
-
-                sendRequest(url, "POST", null,{
-                    student_code,
-                    delete_reason_code_fk,
-                    status,
-                    _token: "{{ csrf_token() }}"
-                })
-                .then(res => {
-                    $btn.prop('disabled', false).html('<i class="bx bx-check-circle"></i> Send to SI');
-
-                    if (res.status === true) {
-                        showAlert({
-                            type: 'success',
-                            message: res.message
-                        }).then(ok => {
-                            if (ok) {
-                                location.reload();
-                            }
-                        });
-
-
-                    } else {
-                        showAlert({
-                                type: 'error',
-                                message: res.message || 'Failed to delete student'
-                            }).then(ok => {
-                            if (ok) {
-                                goNext();
-                            }
-                        });
-
-                    }
-                })
-                .catch(err => {
-                    $btn.prop('disabled', false).html('<i class="bx bx-check-circle"></i> Send to SI');
-                    console.error(err);
-                    showAlert({
-                            type: 'error',
-                            message: 'Something went wrong.'
-                        }).then(ok => {
-                            if (ok) {
-                                goNext();
-                            }
-                        });
-                });            
-                }
-            }); 
-        });
-        $(document).on('click', '.btn-approve', function (e) {
-            e.preventDefault();
-            showAlert({
-                type: 'warning',
-                title: 'Approve Student Deletion',
-                message: 'Do you really want to delete this student?',
-                confirmText: 'Delete'
-            }).then(confirmed  => {
-                if (confirmed ) {
-                    let $btn = $(this);
-                    $btn.prop('disabled', true).text('Approving...');
-
-                    // collect values (example: from hidden inputs)
-                    let student_code = $(this).data('student-code');
-                    let status = $(this).data('status');
-
-                    let url = "{{ route('student.delete') }}";
-
-                    sendRequest(url, "POST", null,{
-                        student_code,
-                        status,
-                        _token: "{{ csrf_token() }}"
-                    })
-                    .then(res => {
-                        $btn.prop('disabled', false).text('Approve');
-
-                        if (res.status === true) {
-                            showAlert({
-                                type: 'success',
-                                message: res.message
-                            }).then(ok => {
-                                    if (ok) {
-                            location.reload();
-                                    }
-                                });
-
-                        } else {
-                            showAlert({
-                                type: 'info',
-                                message: res.message || 'Failed to approve'
-                            }).then(ok => {
-                                    if (ok) {
-                                        goNext();
-                                    }
-                                });
-                        }
-                    })
-                    .catch(err => {
-                        $btn.prop('disabled', false).text('Approve');
-                            showAlert({
-                                type: 'error',
-                                message: 'Something went wrong'
-                            }).then(ok => {
-                                    if (ok) {
-                                        goNext();
-                                    }
-                                });
-                    
-                    });
-                }
-            });
-        });
-        $(document).on('click', '.btn-reject', function (e) {
-            e.preventDefault();
-            showAlert({
-                type: 'warning',
-                title: 'Reject Student Deletion',
-                message: 'Do you really want to reject this student deletion?',
-                confirmText: 'Reject'
-            }).then(confirmed  => {
-                if (confirmed ) {
-                let $btn = $(this);
-                $btn.prop('disabled', true).text('Rejecting...');
-
-                // collect values (example: from hidden inputs)
-                let student_code = $(this).data('student-code');
-                let status = $(this).data('status');
-
-                let url = "{{ route('student.delete') }}";
-
-                sendRequest(url, "POST", null,{
-                    student_code,
-                    status,
-                    _token: "{{ csrf_token() }}"
-                })
-                .then(res => {
-                    $btn.prop('disabled', false).text('Reject');
-
-                    if (res.status === true) {
-                        showAlert({
-                            type: 'success',
-                            message: res.message
-                        }).then(ok => {
-                                if (ok) {
-                                    location.reload();
-                                    }
-                            });
-
-                    } else {
-                        showAlert({
-                            type: 'info',
-                            message: res.message || 'Failed to reject'
-                        }).then(ok => {
-                                if (ok) {
-                                    goNext();
-                                }
-                            });
-                    }
-                })
-                .catch(err => {
-                    $btn.prop('disabled', false).text('Reject');
-                        showAlert({
-                            type: 'error',
-                            message: 'Something went wrong'
-                        }).then(ok => {
-                                if (ok) {
-                                    goNext();
-                                }
-                        });
+                showAlert({
+                    type: 'error',
+                    message: res.message || 'Failed to send'
                 });
             }
-            });
+        })
+        .catch(() => {
+            showAlert({ type: 'error', message: 'Something went wrong' });
+        })
+        .finally(() => {
+            $btn.prop('disabled', false).text('Send to SI');
         });
+    });
+});
+
+$(document).on('click', '#btn_approve_delete', function () {
+
+    showAlert({
+        type: 'warning',
+        title: 'Approve Deletion',
+        message: 'Do you really want to delete this student?',
+        confirmText: 'Approve'
+    }).then(confirmed => {
+
+        if (!confirmed) return;
+
+        const $btn = $(this).prop('disabled', true).text('Approving...');
+
+        sendRequest(
+            "{{ route('student.delete') }}",
+            "POST",
+            null,
+            {
+                student_code: SELECTED_STUDENT_CODE,
+                status: 2,
+                _token: "{{ csrf_token() }}"
+            }
+        )
+        .then(res => {
+            if (res.status) {
+                showAlert({
+                    type: 'success',
+                    message: res.message
+                }).then(() => location.reload());
+            } else {
+                showAlert({
+                    type: 'error',
+                    message: res.message || 'Approval failed'
+                });
+            }
+        })
+        .catch(() => {
+            showAlert({ type: 'error', message: 'Something went wrong' });
+        })
+        .finally(() => {
+            $btn.prop('disabled', false).text('Approve');
+        });
+    });
+});
+$(document).on('click', '#btn_reject_delete', function () {
+
+    showAlert({
+        type: 'warning',
+        title: 'Reject Deletion',
+        message: 'Do you really want to reject this deletion request?',
+        confirmText: 'Reject'
+    }).then(confirmed => {
+
+        if (!confirmed) return;
+
+        const $btn = $(this).prop('disabled', true).text('Rejecting...');
+
+        sendRequest(
+            "{{ route('student.delete') }}",
+            "POST",
+            null,
+            {
+                student_code: SELECTED_STUDENT_CODE,
+                status: 3,
+                _token: "{{ csrf_token() }}"
+            }
+        )
+        .then(res => {
+            if (res.status) {
+                showAlert({
+                    type: 'success',
+                    message: res.message
+                }).then(() => location.reload());
+            } else {
+                showAlert({
+                    type: 'error',
+                    message: res.message || 'Reject failed'
+                });
+            }
+        })
+        .catch(() => {
+            showAlert({ type: 'error', message: 'Something went wrong' });
+        })
+        .finally(() => {
+            $btn.prop('disabled', false).text('Reject');
+        });
+    });
+});
+
     });
 </script>
 @endpush

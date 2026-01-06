@@ -126,8 +126,8 @@
 
                 <ul class="menu-sub">
                     @canany(['view transfer out', 'manage transfer out'])
-                        <li class="menu-item {{ request()->routeIs('student.transfer.out*') ? 'active' : '' }}">
-                            <a href="{{ url('student.transfer.out') }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('student.transferout*') ? 'active' : '' }}">
+                            <a href="{{ route('transferout.index') }}" class="menu-link">
                                 <div>Student's Transfer Out</div>
                             </a>
                         </li>

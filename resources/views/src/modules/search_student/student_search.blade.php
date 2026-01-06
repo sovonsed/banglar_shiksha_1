@@ -45,10 +45,6 @@
                 <th>Present Class</th>
                 <th>Present Section</th>
                 <th>Present Roll No.</th>
-                @if(optional($user->roles()->first())->name === 'HOI Primary')
-                <th>Select Reason</th>
-                @endif
-                <th>Action</th>
             </tr>
         </thead>
         <tbody id="student_result_body">
@@ -62,4 +58,125 @@
 
     </div>
   </div>
+<div class="card mb-3 d-none" id="deactivate_details_card">
+    <div class="card-header bg-warning text-dark py-2">
+        <i class="bx bx-x-circle"></i> Deactivate Details
+    </div>
+
+    <div class="card-body p-2">
+        <form id="deactivate_form">
+            <input type="hidden" id="selected_student_code">
+
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Deactivation Reason</label>
+                    <select class="form-select form-select-sm"
+                            id="deactivation_reason">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button"
+                            class="btn btn-warning btn-sm w-100"
+                            id="btn_deactivate_student">
+                        <i class="bx bx-x-circle"></i> Deactivate
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="card mb-3 d-none" id="delete_details_card">
+    <div class="card-header bg-danger text-white py-2">
+        <i class="bx bx-trash"></i> Delete Details
+    </div>
+
+    <div class="card-body p-2">
+        <form id="delete_form">
+            <input type="hidden" id="selected_student_code">
+
+            <!-- HOI PRIMARY -->
+            <div id="delete_hoi_section" class="d-none">
+                <div class="row g-2">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Delete Reason</label>
+                        <select class="form-select form-select-sm"
+                                id="delete_reason">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button"
+                                class="btn btn-info btn-sm w-100"
+                                id="btn_send_to_si">
+                            <i class="bx bx-send"></i> Send to SI
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SI -->
+            <div id="delete_si_section" class="d-none mt-3">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button type="button"
+                                class="btn btn-success btn-sm w-100"
+                                id="btn_approve_delete">
+                            <i class="bx bx-check-circle"></i> Approve
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button"
+                                class="btn btn-warning btn-sm w-100"
+                                id="btn_reject_delete">
+                            <i class="bx bx-x-circle"></i> Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="card mb-3 d-none" id="transfer_out_details_card">
+    <div class="card-header bg-info text-white py-2">
+        <i class="bx bx-transfer"></i> Transfer Out Details
+    </div>
+
+    <div class="card-body p-2">
+        <form id="transfer_out_form">
+            <input type="hidden" id="selected_student_code">
+
+            <div class="row g-2">
+                  <div class="col-md-6">
+                        <label class="form-label fw-bold">Reason</label>
+                        <select class="form-control" id="delete_reason">
+                          <option value="">-Please Select- </option>
+                        <option value="3">Change of Residence</option>
+                        <option value="1">Change of School</option>
+                        </select>
+                    </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Date of Leaving</label>
+                    <input type="date"
+                           class="form-control form-control-sm"
+                           id="date_of_leaving">
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button"
+                            class="btn btn-info btn-sm w-100"
+                            id="btn_transfer_out">
+                        <i class="bx bx-transfer"></i> Transfer
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 
