@@ -530,7 +530,7 @@
                             </label>
                             <select class="form-select form-select-lg" name="district_id" id="districtSelect"
                                 style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;"
-                                {{ $user_role_info['is_district_officer'] || $user_role_info['is_si_officer'] || $user_role_info['is_school_user'] ? 'disabled' : '' }}>
+                                {{ $user_role_info['is_district_officer'] || $user_role_info['is_si_officer'] || $user_role_info['is_school_user'] || $user_role_info['is_hoi_pe'] ? 'disabled' : '' }}>
                                 <option value="">All Districts</option>
                                 @foreach ($data['districts'] as $district)
                                     <option value="{{ Crypt::encrypt($district->id) }}"
@@ -557,7 +557,7 @@
                             </label>
                             <select class="form-select form-select-lg" name="circle_id" id="circleSelect"
                                 style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;"
-                                {{ $user_role_info['is_si_officer'] || $user_role_info['is_school_user'] ? 'disabled' : (!$selected_district_id ? 'disabled' : '') }}>
+                                {{ $user_role_info['is_si_officer'] || $user_role_info['is_school_user'] || $user_role_info['is_hoi_pe'] ? 'disabled' : (!$selected_district_id ? 'disabled' : '') }}>
                                 <option value="">All Circles</option>
                                 @if ($selected_district_id && isset($data['circles']))
                                     @foreach ($data['circles'] as $circle)
@@ -605,7 +605,7 @@
                             </label>
                             <select class="form-select form-select-lg" name="school_id" id="schoolSelect"
                                 style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;"
-                                 {{ $user_role_info['is_school_user'] ? 'disabled' : (!$selected_district_id ? 'disabled' : '') }}>
+                                 {{ ($user_role_info['is_school_user'] || $user_role_info['is_hoi_pe']) ? 'disabled' : (!$selected_district_id ? 'disabled' : '') }}>
                                 <option value="">All Schools</option>
                                 @if ($selected_district_id && $data['schools']->count() > 0)
                                     @foreach ($data['schools'] as $school)

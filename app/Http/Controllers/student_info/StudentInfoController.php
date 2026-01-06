@@ -1505,13 +1505,13 @@ class StudentInfoController extends Controller
             $user           = Auth::user();
             $user_role_info = user_roles_map();
             $roleName       = $user_role_info['role_name'];
-
+            // dd($user_role_info);
             // ===============================
             // Get user's school information if available
             // ===============================
-            $userSchool = $user->schoolMaster ?? null;
+            $userSchool = $user_role_info['master_details'] ?? null;
             $isSchoolUser = $user_role_info['is_hoi_pe'] && $userSchool ? true : false;
-
+            // dd($isSchoolUser);
             // For circle officers, get their circle
             $userCircle = null;
             if ($user_role_info['is_si_officer']) {
@@ -1559,7 +1559,7 @@ class StudentInfoController extends Controller
             // ===============================
             // Decrypt IDs safely (respecting role restrictions)
             // ===============================
-            if (!$user_role_info['is_school_user'] && !$user_role_info['is_si_officer']) {
+            if (!$user_role_info['is_school_user'] && !$user_role_info['is_si_officer']  && !$user_role_info['is_hoi_pe']) {
                 // Only allow filter changes for Super Admin
                 foreach (['district_id', 'subdivision_id', 'circle_id', 'management_id', 'school_id'] as $field) {
                     if ($request->filled($field)) {
@@ -1577,7 +1577,7 @@ class StudentInfoController extends Controller
             // ===============================
             // MASTER DATA - RESTRICTED BY ROLE
             // ===============================
-            if ($user_role_info['is_school_user'] && $userSchool) {
+            if ($user_role_info['is_hoi_pe'] && $userSchool) {
                 // School users only see their own school's data
                 $data['districts'] = DistrictMaster::where('id', $district_id)
                     ->where('status', 1)
@@ -1690,12 +1690,13 @@ class StudentInfoController extends Controller
                 ->get();
 
             // Academic years (restrict based on role)
-            if ($user_role_info['is_school_user'] && $school_id) {
+            if (($user_role_info['is_school_user'] || $user_role_info['is_hoi_pe']) && $school_id) {
                 $data['academic_years'] = StudentMaster::where('school_code_fk', $school_id)
                     ->select('academic_year')
                     ->distinct()
                     ->orderBy('academic_year', 'desc')
                     ->pluck('academic_year');
+
             } elseif ($user_role_info['is_si_officer'] && $circle_id) {
                 $data['academic_years'] = StudentMaster::where('circle_code_fk', $circle_id)
                     ->select('academic_year')
@@ -1725,7 +1726,7 @@ class StudentInfoController extends Controller
             // ===============================
             // APPLY FILTERS - RESTRICTED BY ROLE
             // ===============================
-            if ($user_role_info['is_school_user'] && $school_id) {
+            if (($user_role_info['is_school_user'] || $user_role_info['is_hoi_pe']) && $school_id) {
                 // School users can only see their own school's students
                 $query->where('school_code_fk', $school_id);
             } elseif ($user_role_info['is_si_officer'] && $circle_id) {
@@ -2045,12 +2046,13 @@ class StudentInfoController extends Controller
 
             $circles = CircleMaster::where('district_id', $district_id)
                 ->where('status', 1)
-                ->select('id', 'name')
+                ->select('id', 'name', 'schcd')
                 ->orderBy('name')
                 ->get()
                 ->map(function ($circle) {
                     return [
                         'id' => $circle->id,
+                        'code' => $circle->schcd,
                         'encrypted_id' => Crypt::encrypt($circle->id),
                         'name' => $circle->name
                     ];

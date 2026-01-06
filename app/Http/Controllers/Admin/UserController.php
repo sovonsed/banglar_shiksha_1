@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use Illuminate\View\View;
 use Illuminate\Support\Arr;
+use App\Models\CircleMaster;
+use App\Models\SchoolMaster;
 use Illuminate\Http\Request;
 use App\Models\DistrictMaster;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +34,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $query = User::with(['roles' => function ($query) {
             $query->select('id', 'name');
@@ -125,9 +127,10 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): View
     {
         $roles = Role::where('name', '!=', 'Super Admin')->pluck('name', 'name')->all();
+        $rolesData = Role::where('name', '!=', 'Super Admin')->get(); // Get full role data
 
         $districts = DistrictMaster::orderBy('name')->get()
             ->map(function ($district) {
@@ -135,7 +138,7 @@ class UserController extends Controller
                 return $district;
             });
 
-        return view('admin.users.create', compact('roles', 'districts'));
+        return view('admin.users.create', compact('roles', 'rolesData', 'districts'));
     }
 
     /**
@@ -147,7 +150,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
-            'dise_code' => 'nullable|string|min:2|max:11|regex:/^[0-9]+$/',
+
             'department' => 'nullable|string|max:255',
             'designation' => 'nullable|string|max:255',
             'password' => [
@@ -159,16 +162,18 @@ class UserController extends Controller
             'role' => 'required|string|exists:roles,name'
         ], [
             'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
-            'dise_code.min' => 'DISE code must be at least 2 digits.',
-            'dise_code.max' => 'DISE code cannot exceed 11 digits.',
-            'dise_code.regex' => 'DISE code must contain only numbers (0-9).',
+
             'role.required' => 'Please select a role for the user.'
         ]);
 
         try {
             $input = $request->all();
+            // Get and validate role-based data
+            $roleData = $this->processRoleBasedData($request);
+            unset($input['dise_code']);
             $input['password'] = Hash::make($input['password']);
             $input['status'] = true;
+            $input['dise_code'] = $roleData['dise_code'] ?? null;
             $input['sso_id'] = Auth::user()->sso_id;
 
             DB::transaction(function () use ($input, $request) {
@@ -266,6 +271,106 @@ class UserController extends Controller
         }
     }
 
+
+
+
+    /**
+     * Process role-based data
+     */
+    private function processRoleBasedData(Request $request): array
+    {
+        $role = $request->role;
+        $data = [];
+
+        // Define role requirements
+        $requirements = [
+            'District Admin' => ['district'],
+            'Block Admin' => ['district', 'circle'],
+            'SI' => ['district', 'circle'],
+            'Circle' => ['district', 'circle'],
+            'School Admin' => ['district', 'circle', 'school'],
+            'HOI Primary' => ['district', 'circle', 'school'],
+            'School' => ['district', 'circle', 'management', 'school'],
+        ];
+
+        // If role has no location requirements
+        if (!isset($requirements[$role])) {
+            // Validate DISE code if provided
+            if ($request->dise_code) {
+                $data['dise_code'] = $request->dise_code;
+            }
+            return $data;
+        }
+
+        // Validate required fields exist
+        foreach ($requirements[$role] as $field) {
+            $fieldName = $field . '_id';
+            if (!$request->$fieldName) {
+                throw new \Exception("{$field} is required for {$role} role.");
+            }
+        }
+
+        // Process each field
+        foreach ($requirements[$role] as $field) {
+            $fieldName = $field . '_id';
+            $encryptedId = $request->$fieldName;
+
+            try {
+                $decryptedId = Crypt::decrypt($encryptedId);
+                $data[$fieldName] = $decryptedId;
+
+                // Get code from the last selected field
+                $code = $this->getCodeFromModel($field, $decryptedId);
+                if ($code) {
+                    $data['dise_code'] = $code;
+                }
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                throw new \Exception("Invalid {$field} ID provided.");
+            }
+        }
+
+        // Verify DISE code matches
+        if (isset($data['dise_code']) && $request->dise_code !== $data['dise_code']) {
+            throw new \Exception("DISE code does not match selected location.");
+        }
+
+        // If no code found from model, use provided DISE code
+        if (!isset($data['dise_code']) && $request->dise_code) {
+            $data['dise_code'] = $request->dise_code;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get code from model
+     */
+    private function getCodeFromModel(string $modelType, $id): ?string
+    {
+        $model = null;
+        $codeField = null;
+
+        switch ($modelType) {
+            case 'district':
+                $model = DistrictMaster::find($id);
+                $codeField = 'code';
+                break;
+            case 'circle':
+                $model = CircleMaster::find($id);
+                $codeField = 'code';
+                break;
+            case 'si':
+                $model = CircleMaster::find($id);
+                $codeField = 'code';
+                break;
+            case 'school':
+                $model = SchoolMaster::find($id);
+                $codeField = 'dise_code';
+                break;
+        }
+
+        return $model ? ($model->$codeField ?? $model->schcd ?? null) : null;
+    }
     /**
      * Display the specified resource.
      */

@@ -116,15 +116,62 @@
         @endcanany
 
 
+        <!-- Student Promotion & Transfer -->
+        @canany(['view transfer out', 'manage transfer out', 'view transfer in', 'manage transfer in'])
+            <li class="menu-item {{ request()->routeIs('student.transfer*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-transfer"></i>
+                    <div>Student Promotion & Transfer</div>
+                </a>
+
+                <ul class="menu-sub">
+                    @canany(['view transfer out', 'manage transfer out'])
+                        <li class="menu-item {{ request()->routeIs('student.transfer.out*') ? 'active' : '' }}">
+                            <a href="{{ url('student.transfer.out') }}" class="menu-link">
+                                <div>Student's Transfer Out</div>
+                            </a>
+                        </li>
+                    @endcanany
+
+                    @canany(['view transfer in', 'manage transfer in'])
+                        <li class="menu-item {{ request()->routeIs('student.transfer.in*') ? 'active' : '' }}">
+                            <a href="{{ url('student.transfer.in') }}" class="menu-link">
+                                <div>Student's Transfer In</div>
+                            </a>
+                        </li>
+                    @endcanany
+                </ul>
+            </li>
+        @endcanany
+
+
         <!-- Student Entry / Update -->
-        @canany(['view entry', 'create entry', 'edit entry', 'view profile', 'edit profile', 'download profile', 'update
-            basic', 'update deactivation', 'update aadhar', 'manage mapping', 'update identity', 'manage additional', 'update section', 'bulk
-            upload', 'update polling'])
-            <li class="menu-item {{ request()->routeIs('student.entry*')
-                                    || request()->routeIs('student.edit*')
-                                    || request()->routeIs('student.update*')
-                                    || request()->routeIs('student.bulk*')
-                                    ? 'active open' : '' }}">
+        @canany([
+            'view entry',
+            'create entry',
+            'edit entry',
+            'view profile',
+            'edit profile',
+            'download profile',
+            'update
+            basic',
+            'update deactivation',
+            'update aadhar',
+            'manage mapping',
+            'update identity',
+            'manage additional',
+            'update section',
+            'bulk
+            upload',
+            'update polling',
+            ])
+            <li
+                class="menu-item {{ request()->routeIs('student.entry*') ||
+                request()->routeIs('student.edit*') ||
+                request()->routeIs('student.update*') ||
+                request()->routeIs('student.bulk*')
+                    ? 'active open'
+                    : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-user"></i>
                     <div>Student Entry / Update</div>
@@ -223,8 +270,18 @@
         @endcanany
 
         <!-- School Information -->
-        @canany(['view school', 'create school', 'edit school', 'delete school', 'list schools', 'view survey', 'manage
-            survey', 'view contacts', 'update contacts'])
+        @canany([
+            'view school',
+            'create school',
+            'edit school',
+            'delete school',
+            'list schools',
+            'view survey',
+            'manage
+            survey',
+            'view contacts',
+            'update contacts',
+            ])
             <li class="menu-item {{ request()->routeIs('school.*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-data"></i>
@@ -313,8 +370,14 @@
                 </a>
 
                 <ul class="menu-sub">
-                    @canany(['view employees', 'create employees', 'edit employees', 'delete employees', 'export
-                        employees'])
+                    @canany([
+                        'view employees',
+                        'create employees',
+                        'edit employees',
+                        'delete employees',
+                        'export
+                        employees',
+                        ])
                         <li class="menu-item {{ request()->routeIs('employee_list') ? 'active' : '' }}">
                             <a href="{{ route('employee_list') }}" class="menu-link">
                                 <div>Employee List</div>
@@ -378,7 +441,8 @@
                 </a>
 
                 <ul class="menu-sub">
-                    @canany(['view employees', 'create employees', 'edit employees', 'delete employees', 'export employees'])
+                    @canany(['view employees', 'create employees', 'edit employees', 'delete employees', 'export
+                        employees'])
                         <li class="menu-item {{ request()->routeIs('employee.list') ? 'active' : '' }}">
                             <a href="{{ route('employee.list') }}" class="menu-link">
                                 <div>Employee List</div>
@@ -390,7 +454,8 @@
         @endcanany
 
         <!-- Mission Banglar Shiksha -->
-        @canany(['view mission', 'manage mission', 'download school_details', 'view school_basic', 'download enrolment_certificate'])
+        @canany(['view mission', 'manage mission', 'download school_details', 'view school_basic', 'download
+            enrolment_certificate'])
             <li class="menu-item {{ request()->routeIs('mission.*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-book-alt"></i>
@@ -427,7 +492,8 @@
 
 
         <!-- Incentives -->
-        @canany(['view incentives', 'manage incentives', 'view stock', 'manage stock', 'view distribution', 'manage distribution'])
+        @canany(['view incentives', 'manage incentives', 'view stock', 'manage stock', 'view distribution', 'manage
+            distribution'])
             <li class="menu-item {{ request()->routeIs('incentives.*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons bx bx-gift"></i>
@@ -444,7 +510,8 @@
                     @endcan
 
                     @can('view distribution')
-                        <li class="menu-item {{ request()->routeIs('incentives.student_wise_distribution') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('incentives.student_wise_distribution') ? 'active' : '' }}">
                             <a href="{{ route('incentives.student_wise_distribution') }}" class="menu-link">
                                 <div>Student wise Stock Distribution</div>
                             </a>
@@ -468,7 +535,8 @@
                     @endcan
 
                     @can('view distribution')
-                        <li class="menu-item {{ request()->routeIs('incentives.stock_distribution_history') ? 'active' : '' }}">
+                        <li
+                            class="menu-item {{ request()->routeIs('incentives.stock_distribution_history') ? 'active' : '' }}">
                             <a href="{{ route('incentives.stock_distribution_history') }}" class="menu-link">
                                 <div>Stock Distribution History</div>
                             </a>
