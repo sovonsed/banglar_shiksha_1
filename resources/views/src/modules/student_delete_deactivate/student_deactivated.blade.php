@@ -294,7 +294,7 @@
         const $btn = $(this).prop('disabled', true).text('Searching...');
 
         sendRequest(
-            "{{ route('search.student.by.student_code') }}",
+            "{{ route('student.search.student_code') }}",
             "POST",
             "#student_search_form"
         )

@@ -275,14 +275,13 @@ Route::middleware(['sso.auth', 'prevent.back'])->group(function () {
         Route::get('/school-class-gender-wise-enrollment', [SiController::class, 'schoolClassGenderWiseEnrollmentReport'])->name('si.school_class_gender_wise_enrollment_report');
     });
     Route::prefix('student')->name('student.')->group(function () {
-        Route::get('/student-deactivate', [StudentDeleteDeacivateController::class, 'deactivateStudentView'])->name('student.deactivate.view');
-        Route::post('/student-search-by-student-code', [SearchStudentController::class, 'searchStudentByStudentCode'])->name('search.student.by.student_code');
-        Route::post('/deactivate', [StudentDeleteDeacivateController::class, 'deactivateStudent'])->name('student.deactivate');
-        Route::get('/delete/list', [StudentDeleteDeacivateController::class, 'deletedStudentView'])->name('student.delete.view');
-        Route::post('/delete', [StudentDeleteDeacivateController::class, 'deleteStudent'])->name('student.delete');
-        Route::post('/activate', [StudentDeleteDeacivateController::class, 'activateStudent'])->name('student.activate');
+        Route::get('/deactivate', [StudentDeleteDeacivateController::class, 'deactivateStudentView'])->name('deactivate.view');
+        Route::post('/search-by-student-code', [SearchStudentController::class, 'searchStudentByStudentCode'])->name('search.student_code');
+        Route::post('/deactivate', [StudentDeleteDeacivateController::class, 'deactivateStudent'])->name('deactivate');
+        Route::get('/delete/list', [StudentDeleteDeacivateController::class, 'deletedStudentView'])->name('delete.view');
+        Route::post('/delete', [StudentDeleteDeacivateController::class, 'deleteStudent'])->name('delete');
+        Route::post('/activate', [StudentDeleteDeacivateController::class, 'activateStudent'])->name('activate');
         Route::resource('transferout', StudentTransferOutController::class);
-
     });
 
 

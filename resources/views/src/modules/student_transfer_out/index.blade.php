@@ -8,7 +8,7 @@
     <div
         class="page-header mb-3 d-flex justify-content-between align-items-center"
     >
-        <h5 class="fw-bold mb-0">Search Student for Dectivation</h5>
+        <h5 class="fw-bold mb-0">Search Student for Transfer Out</h5>
 </div>
         @include('src.modules.search_student.student_search')
     @endif
@@ -273,7 +273,7 @@ $("#btn_search_student").on("click", function (e) {
     const $btn = $(this).prop('disabled', true).text('Searching...');
 
     sendRequest(
-        "{{ route('search.student.by.student_code') }}",
+        "{{ route('student.search.student_code') }}",
         "POST",
         "#student_search_form"
     )
