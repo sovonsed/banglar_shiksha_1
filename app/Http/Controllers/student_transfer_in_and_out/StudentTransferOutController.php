@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\{
-    StudentMaster};
+StudentMaster,
+StudentApiTrackModel};
 use App\Models\student_transfer_in_and_out\StudentTransferOutModel;
 use Illuminate\Support\Facades\DB;
 class StudentTransferOutController extends Controller
@@ -17,6 +18,7 @@ class StudentTransferOutController extends Controller
         try {
             $user = Auth::user();
             // dd($user);
+            // dd(optional($user->roles()->first())->name);    
             $user_role_info = user_roles_map();
             $roleName       = $user_role_info['role_name'];
             $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
@@ -29,7 +31,8 @@ class StudentTransferOutController extends Controller
             // dd($roleName);
             $query = StudentTransferOutModel::query()
                 ->with([
-                    'studentInfo:student_code,studentname,dob,guardian_name,cur_roll_number'
+                    'studentInfo:student_code,studentname,dob,guardian_name,cur_roll_number',
+                    'reasonInfo:id,name'
                 ])
                 ->where('status', 1);
             if (in_array($roleName, ['HOI Primary'])) {
@@ -71,10 +74,9 @@ class StudentTransferOutController extends Controller
             ]);
 
             /* -------------------------------------------------
-            | 2. Check student in bs_student_master (same school)
+            | 2. Check student in bs_student_master
             -------------------------------------------------*/
-            $student = DB::table('bs_student_master')
-                ->where('student_code', $data['student_code'])
+            $student = StudentMaster::where('student_code', $data['student_code'])
                 ->where('school_code_fk', $school_id)
                 ->lockForUpdate()
                 ->first();
@@ -84,23 +86,24 @@ class StudentTransferOutController extends Controller
                 return response()->json([
                     'status'  => false,
                     'message' => 'This Student does not exist in this school'
-                ], 404);
+                ]);
             }
 
             /* -------------------------------------------------
             | 3. Check Dropbox existence
             -------------------------------------------------*/
-            $alreadyExists = DB::table('ep_student_dropbox')
-                ->where('student_code', $data['student_code'])
-                ->exists();
-
-            if ($alreadyExists) {
+            if (
+                StudentTransferOutModel::withTrashed()
+                    ->where('student_code', $data['student_code'])
+                    ->exists()
+            ) {
                 DB::rollBack();
                 return response()->json([
                     'status'  => false,
                     'message' => 'This Student already exists in Dropbox.'
-                ], 409);
+                ]);
             }
+
 
             /* -------------------------------------------------
             | 4. Insert into ep_student_dropbox
@@ -115,8 +118,6 @@ class StudentTransferOutController extends Controller
                 'gs_ward_code_fk'             => $student->gs_ward_code_fk,
                 'reason_code_fk'              => $data['reason_code_fk'],
                 'not_transfer_reason_code_fk' => null,
-                'uniform_status'              => $student->uniform_status,
-                'status'                      => 1,
                 'entry_ip'                    => $request->ip(),
                 'created_at'                  => now(),
                 'created_by'                  => $user->id,
@@ -125,41 +126,55 @@ class StudentTransferOutController extends Controller
             /* -------------------------------------------------
             | 5. Update ep_student_master
             -------------------------------------------------*/
-            DB::table('ep_student_master')
+            StudentMaster::where('student_code', $student->student_code)
+            ->where('district_code_fk', $district_id)
+            ->update([
+                'status'     => 2, // Transfer Out
+                'updated_at' => now(),
+                'updated_by' => $user->id,
+                'update_ip'  => $request->ip(),
+            ]);
+            /* -------------------------------------------------
+            | 6. Refresh bs_student_api_track
+            -------------------------------------------------*/
+            $apiTrack = StudentApiTrackModel::withTrashed()
                 ->where('student_code', $student->student_code)
-                ->update([
-                    'status'       => 2, // Transfer Out
-                    'updated_at'   => now(),
-                    'updated_by'   => $user->id,
-                    'update_ip'    => $request->ip(),
+                ->first();
+
+            if ($apiTrack) {
+                $apiTrack->restore();
+                $apiTrack->update([
+                    'school_code_fk'            => $student->school_code_fk,
+                    'sms_status'                => 1,
+                    'kanyashree_status'         => 1,
+                    'vocational_council_status' => 1,
+                    'rbsk_status'               => 1,
+                    'bcw_status'                => 1,
+                    'udise_status'              => 1,
+                    'utsashree_status'          => 1,
+                    'sabooj_sathi_status'       => 1,
+                    'wbchse_status'             => 1,
+                    'status'                    => 3,
+                    'updated_at'                => now(),
                 ]);
+            } else {
+                StudentApiTrackModel::create([
+                    'student_code'              => $student->student_code,
+                    'school_code_fk'            => $student->school_code_fk,
+                    'district_id_fk'            => $student->district_code_fk,
+                    'sms_status'                => 1,
+                    'kanyashree_status'         => 1,
+                    'vocational_council_status' => 1,
+                    'rbsk_status'               => 1,
+                    'bcw_status'                => 1,
+                    'udise_status'              => 1,
+                    'utsashree_status'          => 1,
+                    'sabooj_sathi_status'       => 1,
+                    'wbchse_status'             => 1,
+                    'created_at'                => now(),
+                ]);
+            }
 
-            /* -------------------------------------------------
-            | 6. Update ep_student_history
-            -------------------------------------------------*/
-            DB::table('ep_student_history')->insert([
-                'student_code' => $student->student_code,
-                'status'       => 2,
-                'remarks'      => 'Transferred Out',
-                'created_at'   => now(),
-                'created_by'   => $user->id,
-                'entry_ip'     => $request->ip(),
-            ]);
-
-            /* -------------------------------------------------
-            | 7. Refresh API track (partition table)
-            -------------------------------------------------*/
-            $apiTable = 'ep_student_api_track_' . $district_id;
-
-            DB::table($apiTable)
-                ->where('student_code', $student->student_code)
-                ->delete();
-
-            DB::table($apiTable)->insert([
-                'student_code' => $student->student_code,
-                'status'       => 3,
-                'synced_at'    => now(),
-            ]);
 
             DB::commit();
 
@@ -175,7 +190,8 @@ class StudentTransferOutController extends Controller
                 'status'  => false,
                 'message' => 'Something went wrong',
                 'error'   => $e->getMessage(),
-            ], 500);
+            ]);
         }
     }
+
 }

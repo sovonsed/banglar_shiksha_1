@@ -200,7 +200,7 @@
     $(document).ready(function () {
       const USER_ROLE = @json(optional($user->roles()->first())->name);
       let DEACTIVATION_REASONS = [];
-      $("#search_purpose").val('3');
+      $("#search_purpose").val('4');
       /* Fetch reasons only once */
 
         function populateStudentRow(d) {

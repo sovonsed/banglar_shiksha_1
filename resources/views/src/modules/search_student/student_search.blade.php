@@ -153,7 +153,7 @@
             <div class="row g-2">
                   <div class="col-md-6">
                         <label class="form-label fw-bold">Reason</label>
-                        <select class="form-control" id="delete_reason">
+                        <select class="form-control" id="transfer_out_reason">
                           <option value="">-Please Select- </option>
                         <option value="3">Change of Residence</option>
                         <option value="1">Change of School</option>
@@ -170,7 +170,7 @@
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="button"
                             class="btn btn-info btn-sm w-100"
-                            id="btn_transfer_out">
+                            id="btn_transfer_out" id="btn_transfer_out">
                         <i class="bx bx-transfer"></i> Transfer
                     </button>
                 </div>

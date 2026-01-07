@@ -14,7 +14,7 @@ return new class extends Migration
          */
         DB::statement("
             CREATE TABLE bs_student_dropbox_archive (
-                id BIGINT NOT NULL,
+                id BIGINT GENERATED ALWAYS AS IDENTITY,
                 dropbox_id BIGINT NOT NULL,
                 student_code CHAR(14) NOT NULL,
                 academic_year INT NOT NULL,
@@ -60,6 +60,8 @@ return new class extends Migration
             $table->foreign('district_code_fk')->references('id')->on('bs_district_master');
             $table->foreign('circle_code_fk')->references('id')->on('bs_circle_master');
             $table->foreign('school_code_fk')->references('id')->on('bs_school_master');
+            $table->foreign('reason_code_fk')->references('id')->on('bs_student_transfer_out_reason_master');
+
          });
     }
 

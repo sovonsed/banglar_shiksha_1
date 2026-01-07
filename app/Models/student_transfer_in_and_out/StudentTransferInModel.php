@@ -7,28 +7,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\StudentMaster;
 use App\Models\TransferOutReasonModel;
-
-class StudentTransferOutModel extends Model
+class StudentTransferInModel extends Model
 {
-    use HasFactory, SoftDeletes;
-    protected $table = 'bs_student_dropbox';
-    public $timestamps = false; // 
+ use HasFactory, SoftDeletes;
+    protected $table = 'bs_student_transfer_history';
+    public $timestamps = false; 
     protected $fillable = [
         'student_code',
+        'studentname',
+        'dob',
         'academic_year',
-        'school_code_fk',
-        'circle_code_fk',
-        'block_munc_code_fk',
-        'district_code_fk',
-        'gs_ward_code_fk',
+        'cur_class_code_fk',
+        'cur_section_code_fk',
+        'cur_roll_number',
+        'old_school_code_fk',
+        'new_school_code_fk',
         'reason_code_fk',
-        'not_transfer_reason_code_fk',
-        'uniform_status',
-        'status',
         'entry_ip',
-        'created_at',
-        'created_by',
-        'deleted_at'
+        'enter_by',
+        'enter_by_stake_cd',
+        'transfer_out_date',
+        'status',
+        'created_at'
     ];
     public function studentInfo()
     {

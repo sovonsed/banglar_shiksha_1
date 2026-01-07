@@ -22,6 +22,7 @@ use App\Http\Controllers\{
     TeacherManagementController,
     SiController,
 };
+use App\Http\Controllers\student_transfer_in_and_out\StudentTransferInController;
 use App\Http\Controllers\student_transfer_in_and_out\StudentTransferOutController;
 
 // SSO Authentication Routes
@@ -282,7 +283,8 @@ Route::middleware(['sso.auth', 'prevent.back'])->group(function () {
         Route::post('/delete', [StudentDeleteDeacivateController::class, 'deleteStudent'])->name('delete');
         Route::post('/activate', [StudentDeleteDeacivateController::class, 'activateStudent'])->name('activate');
         Route::resource('transferout', StudentTransferOutController::class);
-    });
+        Route::resource('transferin', StudentTransferInController::class);
+    }); 
 
 
     // Route::get('/test-error', function () {

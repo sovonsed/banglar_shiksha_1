@@ -134,8 +134,8 @@
                     @endcanany
 
                     @canany(['view transfer in', 'manage transfer in'])
-                        <li class="menu-item {{ request()->routeIs('student.transfer.in*') ? 'active' : '' }}">
-                            <a href="{{ url('student.transfer.in') }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('student.transferin*') ? 'active' : '' }}">
+                            <a href="{{ route('student.transferin.index') }}" class="menu-link">
                                 <div>Student's Transfer In</div>
                             </a>
                         </li>

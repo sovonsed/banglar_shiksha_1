@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\{
     StudentMaster};
+use App\Models\student_transfer_in_and_out\StudentTransferOutModel;
 
 class SearchStudentController extends Controller
 {
@@ -14,34 +15,64 @@ class SearchStudentController extends Controller
     {
         try {
             $user = Auth::user();
-            $user_role_info = user_roles_map();
-            $roleName       = $user_role_info['role_name'];
-            $scope = user_scope();     // 🔥 FULLY DYNAMIC ROLE ENGINE
-            $district_id    = $scope['district_code_fk'] ?? null;
-            $subdivision_id = $scope['subdivision_code_fk'] ?? null;
-            $circle_id      = $scope['circle_code_fk'] ?? null;
-            $management_id  = $scope['school_management_code_fk'] ?? null;
-            $school_id      = $scope['school_code_fk'] ?? null;
-            // dd($school_id);
+            $roleName = user_roles_map()['role_name'] ?? null;
+            $scope = user_scope();
 
-            // -------------------------------
-            // Validation
-            // -------------------------------
+            $school_id = $scope['school_code_fk'] ?? null;
+
+            /* -------------------------------------------------
+            | Validation
+            -------------------------------------------------*/
             $request->validate([
-                'student_code'    => ['required', 'digits:14'],
-                'search_purpose'  => ['required'], // 1=Deactivate, 2=Delete
+                'student_code'   => ['required', 'digits:14'],
+                'search_purpose' => ['required'], // 1=Deactivate, 2=Delete, 3=Transfer Out, 4=Transfer In
             ]);
 
-            $student_code   = $request->student_code;
-            $searchPurpose  = (int) $request->search_purpose;
+            $student_code  = $request->student_code;
+            $searchPurpose = (int) $request->search_purpose;
 
-            // -------------------------------
-            // Base query
-            // -------------------------------
+            /* =================================================
+            | PURPOSE 4 → SEARCH IN DROPBOX
+            =================================================*/
+            if ($searchPurpose === 4) {
+
+                $student = StudentTransferOutModel::with([
+                        'studentInfo.currentClass:id,name',
+                        'studentInfo.currentSection:id,name',
+                    ])
+                    ->where('student_code', $student_code)
+                    ->first();
+                    if (!$student || !$student->studentInfo) {
+                        return response()->json([
+                            'status'  => false,
+                            'message' => 'Student not found or not pending for selected action'
+                        ], 200);
+                    }
+
+                    return response()->json([
+                        'status' => true,
+                        'data'   => [
+                            'student_code'    => $student->student_code,
+                            'studentname'     => $student->studentInfo->getAttributes()['studentname'],
+                            'dob'             => $student->studentInfo->dob,
+                            'guardian_name'   => $student->studentInfo->guardian_name,
+                            'current_class'   => $student->studentInfo->currentClass?->name,
+                            'current_section' => $student->studentInfo->currentSection?->name,
+                            'cur_roll_number' => $student->studentInfo->cur_roll_number,
+                            'status'          => $student->studentInfo->status,
+                            'search_purpose'  => $searchPurpose,
+                        ]
+                    ]);
+
+            }
+
+            /* =================================================
+            | PURPOSE 1,2,3 → SEARCH IN STUDENT MASTER
+            =================================================*/
             $query = StudentMaster::with([
-                'currentClass:id,name',
-                'currentSection:id,name'
-            ])
+                    'currentClass:id,name',
+                    'currentSection:id,name'
+                ])
                 ->select([
                     'student_code',
                     'studentname',
@@ -50,44 +81,24 @@ class SearchStudentController extends Controller
                     'cur_class_code_fk',
                     'cur_section_code_fk',
                     'cur_roll_number',
-                    'status'
-                ])
+                    'status',
+                    'school_code_fk'                ])
                 ->where('student_code', $student_code);
 
-            // =================================================
-            // ROLE BASED FILTERING
-            // =================================================
-
-            // -------------------------------
-            // HOI / SCHOOL ADMIN
-            // -------------------------------
+            /* -------------------------------------------------
+            | Role-based filtering (HOI)
+            -------------------------------------------------*/
             if (in_array($roleName, ['HOI Primary'])) {
-                $query->where('school_code_fk', $school_id)
-                    ->where('status', 1);
 
-                // -------------------------------
-                // SI (CIRCLE OFFICER)
-                // -------------------------------
-            } elseif ($roleName === 'SI') {
-                $query->where('district_code_fk', $district_id)
-                    ->where('circle_code_fk', $circle_id);
-                if ($searchPurpose === 2) {
-                    $query->where('status', 2);
-                } else if ($searchPurpose === 1) {
-                    $query->where('status', 3);
+                if (in_array($searchPurpose, [1, 2, 3])) {
+                    $query->where('school_code_fk', $school_id)
+                        ->where('status', 1);
                 }
-                // -------------------------------
-                // DISTRICT OFFICER
-                // -------------------------------
-            } elseif ($roleName === 'District Officer') {
-
-                $query->where('district_code_fk', $district_id)
-                    ->whereIn('status', [1, 2, 3]);
+                else if($searchPurpose === 4){
+                    $query->where('status', 2);
+                }
             }
-            // dd($query);
             $student = $query->first();
-            // dd($student);
-
 
             if (!$student) {
                 return response()->json([
@@ -96,9 +107,9 @@ class SearchStudentController extends Controller
                 ], 200);
             }
 
-            // -------------------------------
-            // Response
-            // -------------------------------
+            /* -------------------------------------------------
+            | Response (same structure)
+            -------------------------------------------------*/
             return response()->json([
                 'status' => true,
                 'data'   => [
@@ -113,20 +124,20 @@ class SearchStudentController extends Controller
                     'search_purpose'  => $searchPurpose,
                 ]
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'status'  => false,
                 'message' => 'Validation failed',
                 'errors'  => $e->errors(),
             ], 422);
         } catch (\Throwable $e) {
-
             return response()->json([
                 'status'  => false,
                 'message' => 'An error occurred',
-                false   => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
+
 }
