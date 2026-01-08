@@ -5,12 +5,11 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/common.css') }}">
-    <link href='https://cdn.boxicons.com/3.0.6/fonts/basic/boxicons.min.css' rel='stylesheet'>
 @endpush
 
 @section('content')
+    <!-- container -->
     <div class="container-fluid px-4">
-
         <!-- Stats Cards -->
         <div class="row">
             <div class="col-md-2 mb-4">
@@ -88,7 +87,7 @@
                 <div class="card-body">
                     <div class="card-title d-flex align-items-start justify-content-between">
                         <div class="avatar lt-seegreen">
-                            <i class='bx bx-reading text-info'></i> 
+                            <i class='bx bxs-graduation text-info'></i> 
                         </div>
                     </div>
                     <h2 class="fw-bold mb-2 text-info">{{ $data['class_distribution'] ?? 0 }}</h2>
@@ -99,39 +98,18 @@
        
         </div>      
             
-        <!-- Advanced Filters Card -->
-        <div class="glass-card mb-4">
-            <div class="gradient-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="mb-1 fw-bold" style="font-size: 22px; font-weight: 700; color: white;">
-                            <i class="fas fa-filter me-2"></i> Advanced Student Filters
-                        </p>
-
-                        @if ($user_school)
-                            <small class="text-white-50">
-                                <i class="fas fa-school me-1"></i> Viewing students from:
-                                <strong>{{ $user_school->school_name }}</strong> ({{ $user_school->schcd }})
-                                @if (!$selected_school_id)
-                                    <span class="badge bg-warning ms-2">Default School</span>
-                                @endif
-                            </small>
-                        @endif
-                    </div>
-                    <i class="fas fa-sliders-h fa-2x opacity-50"></i>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <form method="GET" action="{{ route('students.list') }}" id="filterForm">
+        
+        
+        <div class="card mb-4 mt-2">
+                <h5 class="card-header bg-primary text-white fw-semibold ">Advanced Student Filters</h5>
+                <div class="card-body">
                     <div class="row g-3">
                         <!-- District -->
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-map-marked-alt me-2"></i>District
-                            </label>
-                            <select class="form-select form-select-lg" name="district_id" id="districtSelect"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
+                            <label class="form-label fw-semibold text-muted mb-2">District</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-map"></i></span>
+                            <select class="form-select" name="district_id" id="districtSelect">
                                 <option value="">All Districts</option>
                                 @foreach ($data['districts'] as $district)
                                     <option value="{{ Crypt::encrypt($district->id) }}"
@@ -140,16 +118,15 @@
                                     </option>
                                 @endforeach
                             </select>
+                            </div>
                         </div>
-
                         <!-- Block -->
                         <!-- Circle -->
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-circle me-2"></i>Circle
-                            </label>
-                            <select class="form-select form-select-lg" name="circle_id" id="circleSelect"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;"
+                            <label class="form-label fw-semibold text-muted mb-2">Circle</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-data"></i></span>
+                            <select class="form-select" name="circle_id" id="circleSelect"
                                 {{ !$selected_district_id ? 'disabled' : '' }}>
                                 <option value="">All Circles</option>
                                 @if ($selected_district_id && isset($data['circles']))
@@ -161,15 +138,15 @@
                                     @endforeach
                                 @endif
                             </select>
+                            </div>
                         </div>
 
                         <!-- Management -->
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-university me-2"></i>Management
-                            </label>
-                            <select class="form-select form-select-lg" name="management_id"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
+                            <label class="form-label fw-semibold text-muted mb-2">Management</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-list-ul"></i></span>
+                            <select class="form-select" name="management_id">
                                 <option value="">All Management</option>
                                 @foreach ($data['managements'] as $management)
                                     <option value="{{ Crypt::encrypt($management->id) }}"
@@ -178,15 +155,15 @@
                                     </option>
                                 @endforeach
                             </select>
+                            </div>
                         </div>
 
                         <!-- School -->
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-school me-2"></i>School
-                            </label>
-                            <select class="form-select form-select-lg" name="school_id" id="schoolSelect"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;"
+                            <label class="form-label fw-semibold text-muted mb-2">School</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-building"></i></span>
+                            <select class="form-select" name="school_id" id="schoolSelect"
                                 {{ !$selected_district_id ? 'disabled' : '' }}>
                                 <option value="">All Schools</option>
                                 @if ($selected_district_id && $data['schools']->count() > 0)
@@ -198,15 +175,15 @@
                                     @endforeach
                                 @endif
                             </select>
+                            </div>
                         </div>
 
                         <!-- Gender -->
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-venus-mars me-2"></i>Gender
-                            </label>
-                            <select class="form-select form-select-lg" name="gender"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
+                            <label class="form-label fw-semibold text-muted mb-2">Gender</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-male-sign"></i></span>
+                            <select class="form-select" name="gender">
                                 <option value="">All Gender</option>
                                 @foreach ($data['genders'] ?? [] as $gender)
                                     <option value="{{ $gender->id }}"
@@ -215,15 +192,15 @@
                                     </option>
                                 @endforeach
                             </select>
+                            </div>
                         </div>
 
                         <!-- Class -->
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-graduation-cap me-2"></i>Class
-                            </label>
-                            <select class="form-select form-select-lg" name="class"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
+                            <label class="form-label fw-semibold text-muted mb-2">Class</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bxs-graduation"></i></span>
+                            <select class="form-select" name="class">
                                 <option value="">All Classes</option>
                                 @foreach ($data['classes'] ?? [] as $class)
                                     <option value="{{ $class->id }}"
@@ -232,15 +209,15 @@
                                     </option>
                                 @endforeach
                             </select>
+                            </div>
                         </div>
 
                         <!-- Social Category -->
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-layer-group me-2"></i> School Category
-                            </label>
-                            <select class="form-select form-select-lg" name="category"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
+                            <label class="form-label fw-semibold text-muted mb-2">School Category</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-sitemap"></i></span>
+                            <select class="form-select" name="category">
                                 <option value="">All Categories</option>
                                 @foreach ($data['categories'] as $category)
                                     <option value="{{ $category->id }}"
@@ -249,15 +226,15 @@
                                     </option>
                                 @endforeach
                             </select>
+                            </div>
                         </div>
 
                         <!-- Academic Year -->
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-calendar-alt me-2"></i>Academic Year
-                            </label>
-                            <select class="form-select form-select-lg" name="academic_year"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
+                            <label class="form-label fw-semibold text-muted mb-2">Academic Year</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-calendar"></i></span>
+                            <select class="form-select" name="academic_year">
                                 <option value="">All Years</option>
                                 @foreach ($data['academic_years'] as $year)
                                     <option value="{{ $year }}"
@@ -266,296 +243,135 @@
                                     </option>
                                 @endforeach
                             </select>
+                            </div>
                         </div>
 
                         <!-- BPL Status -->
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-heart me-2"></i>BPL Status
-                            </label>
-                            <select class="form-select form-select-lg" name="bpl"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold text-muted mb-2">BPL Status</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-user-check"></i></span>
+                            <select class="form-select" name="bpl">
                                 <option value="">All</option>
                                 <option value="1" {{ $bpl_param == '1' ? 'selected' : '' }}>BPL</option>
                                 <option value="0" {{ $bpl_param == '0' ? 'selected' : '' }}>Non-BPL</option>
                             </select>
+                            </div>
                         </div>
 
                         <!-- CWSN Status -->
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold text-muted mb-2">
-                                <i class="fas fa-wheelchair me-2"></i>CWSN Status
-                            </label>
-                            <select class="form-select form-select-lg" name="cwsn"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold text-muted mb-2">CWSN Status</label>
+                            <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-user-check"></i></span>
+                            <select class="form-select" name="cwsn">
                                 <option value="">All</option>
                                 <option value="2" {{ $cwsn_param == '2' ? 'selected' : '' }}>CWSN</option>
                                 <option value="0" {{ $cwsn_param == '0' ? 'selected' : '' }}>Non-CWSN</option>
                             </select>
+                            </div>
                         </div>
-
-                        <!-- Action Buttons -->
-                        <div class="col-md-4 d-flex align-items-end gap-3">
-                            <button type="submit" class="btn btn-lg flex-grow-1"
-                                style="
-                            background: var(--primary-gradient);
-                            color: white;
-                            border: none;
-                            border-radius: 12px;
-                            height: 52px;
-                            font-weight: 600;
-                            transition: var(--transition);
-                        ">
-                                <i class="fas fa-filter me-2"></i> Apply Filters
-                            </button>
-                            <a href="{{ route('students.list') }}" class="btn btn-lg"
-                                style="
-                            background: linear-gradient(135deg, #f5656520 0%, #ed893620 100%);
-                            color: #f56565;
-                            border: 2px solid #f56565;
-                            border-radius: 12px;
-                            height: 52px;
-                            font-weight: 600;
-                            transition: var(--transition);
-                            min-width: 120px;
-                        ">
-                                <i class="fas fa-times me-2"></i> Clear All
-                            </a>
-                        </div>
-                    </div>
-                </form>
-
-                <!-- Active Filters -->
-                @if (
-                    $selected_district_id ||
-                        $selected_management_id ||
-                        $selected_school_id ||
-                        $gender_param ||
-                        $class_param ||
-                        $category_param ||
-                        $bpl_param !== '' ||
-                        $cwsn_param !== '' ||
-                        $academic_year_param ||
-                        $search_param)
-                    <div class="mt-4 pt-3 border-top">
-                        <h6 class="fw-semibold text-muted mb-3"><i class="fas fa-filter me-2"></i>Active Filters</h6>
-                        <div class="d-flex flex-wrap">
-                            @if ($selected_district_id)
-                                <div class="filter-badge">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    District:
-                                    {{ $data['districts']->where('id', $selected_district_id)->first()->name ?? 'N/A' }}
-                                    <a href="{{ route('students.list', array_merge(request()->except('district_id'), ['district_id' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-
-
-
-
-                            @if ($selected_management_id)
-                                <div class="filter-badge">
-                                    <i class="fas fa-university"></i>
-                                    Management:
-                                    {{ $data['managements']->where('id', $selected_management_id)->first()->name ?? 'N/A' }}
-                                    <a href="{{ route('students.list', array_merge(request()->except('management_id'), ['management_id' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if ($selected_school_id)
-                                <div class="filter-badge">
-                                    <i class="fas fa-school"></i>
-                                    School:
-                                    {{ $data['schools']->where('id', $selected_school_id)->first()->school_name ?? 'N/A' }}
-                                    <a href="{{ route('students.list', array_merge(request()->except('school_id'), ['school_id' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if ($gender_param)
-                                <div class="filter-badge">
-                                    <i class="fas fa-venus-mars"></i>
-                                    Gender: {{ $data['genders']->where('id', $gender_param)->first()->name ?? 'N/A' }}
-                                    <a href="{{ route('students.list', array_merge(request()->except('gender'), ['gender' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if ($class_param)
-                                <div class="filter-badge">
-                                    <i class="fas fa-graduation-cap"></i>
-                                    Class: {{ $data['classes']->where('id', $class_param)->first()->name ?? 'N/A' }}
-                                    <a href="{{ route('students.list', array_merge(request()->except('class'), ['class' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if ($category_param)
-                                <div class="filter-badge">
-                                    <i class="fas fa-layer-group"></i>
-                                    Category:
-                                    {{ $data['categories']->where('id', $category_param)->first()->name ?? 'N/A' }}
-                                    <a href="{{ route('students.list', array_merge(request()->except('category'), ['category' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if ($academic_year_param)
-                                <div class="filter-badge">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    Year: {{ $academic_year_param }}-{{ $academic_year_param + 1 }}
-                                    <a href="{{ route('students.list', array_merge(request()->except('academic_year'), ['academic_year' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if ($bpl_param !== '')
-                                <div class="filter-badge">
-                                    <i class="fas fa-heart"></i>
-                                    BPL: {{ $bpl_param == '1' ? 'Yes' : 'No' }}
-                                    <a href="{{ route('students.list', array_merge(request()->except('bpl'), ['bpl' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if ($cwsn_param !== '')
-                                <div class="filter-badge">
-                                    <i class="fas fa-wheelchair"></i>
-                                    CWSN: {{ $cwsn_param == '2' ? 'Yes' : 'No' }}
-                                    <a href="{{ route('students.list', array_merge(request()->except('cwsn'), ['cwsn' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if ($search_param)
-                                <div class="filter-badge">
-                                    <i class="fas fa-search"></i>
-                                    Search: "{{ $search_param }}"
-                                    <a href="{{ route('students.list', array_merge(request()->except('search'), ['search' => ''])) }}"
-                                        class="close-filter">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                            @endif
-
-                            @if (
-                                $selected_district_id ||
-                                    $selected_management_id ||
-                                    $selected_school_id ||
-                                    $gender_param ||
-                                    $class_param ||
-                                    $category_param ||
-                                    $bpl_param !== '' ||
-                                    $cwsn_param !== '' ||
-                                    $academic_year_param ||
-                                    $search_param)
-                                <div class="filter-badge"
-                                    style="background: linear-gradient(135deg, #f5656520 0%, #ed893620 100%); color: #f56565;">
-                                    <a href="{{ route('students.list') }}" class="text-decoration-none"
-                                        style="color: inherit;">
-                                        <i class="fas fa-times-circle"></i> Clear All Filters
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Search Box -->
-        <div class="search-container">
-            <form method="GET" action="{{ route('students.list') }}">
-                <div class="row g-3">
-                    <div class="col-md-8">
-                        <div class="position-relative">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" name="search" class="form-control form-control-lg search-input"
-                                placeholder="Search by student name, admission number, Aadhaar, father name, school..."
-                                value="{{ $search_param }}">
-                            <!-- Hidden fields to preserve filters -->
-                            @if ($selected_district_id)
-                                <input type="hidden" name="district_id"
-                                    value="{{ $encrypted_params['district_id'] ?? '' }}">
-                            @endif
-
-                            @if ($selected_management_id)
-                                <input type="hidden" name="management_id"
-                                    value="{{ $encrypted_params['management_id'] ?? '' }}">
-                            @endif
-                            @if ($selected_school_id)
-                                <input type="hidden" name="school_id"
-                                    value="{{ $encrypted_params['school_id'] ?? '' }}">
-                            @endif
-                            @if ($gender_param)
-                                <input type="hidden" name="gender" value="{{ $gender_param }}">
-                            @endif
-                            @if ($class_param)
-                                <input type="hidden" name="class" value="{{ $class_param }}">
-                            @endif
-                            @if ($category_param)
-                                <input type="hidden" name="category" value="{{ $category_param }}">
-                            @endif
-                            @if ($academic_year_param)
-                                <input type="hidden" name="academic_year" value="{{ $academic_year_param }}">
-                            @endif
-                            @if ($bpl_param !== '')
-                                <input type="hidden" name="bpl" value="{{ $bpl_param }}">
-                            @endif
-                            @if ($cwsn_param !== '')
-                                <input type="hidden" name="cwsn" value="{{ $cwsn_param }}">
-                            @endif
-                        </div>
-                    </div>
-                    <div class="col-md-4 d-flex gap-3">
-                        <button type="submit" class="btn btn-lg flex-grow-1"
-                            style="
-                        background: var(--success-gradient);
-                        color: white;
-                        border: none;
-                        border-radius: 12px;
-                        font-weight: 600;
-                    ">
-                            <i class="fas fa-search me-2"></i> Search
-                        </button>
-
-                        <div class="input-group" style="width: 180px;">
-                            <span class="input-group-text bg-transparent border-end-0"
-                                style="border-radius: 12px 0 0 12px; border: 2px solid #e2e8f0;">
-                                <i class="fas fa-list-ol"></i>
-                            </span>
+			        </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 text-center mt-4">
+                        <button type="submit" class="btn btn-success"><i class="bx bx-filter"></i> Apply Filters</button>
+                        <a href="{{ route('students.list') }}" class="btn btn-danger"><i class='bx bx-arrow-back'></i>  Clear</a>
+                    	</div>
+                   </div> 
+                </div>
+           </div>
+           
+           <!-- Search Box -->
+           <div class="card mb-4 mt-2">
+                <h5 class="card-header bg-primary text-white fw-semibold ">Advanced Search</h5>
+                <div class="card-body">
+                <form method="GET" action="{{ route('students.list') }}">
+                    <div class="row g-3">
+                         <div class="col-md-8">
+                                <div class="input-group">
+                                <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                <input type="text" name="search" class="form-control search-input" placeholder="Search by student name, admission number, Aadhaar, father name, school..." value="{{ $search_param }}">
+                                <!-- Hidden fields to preserve filters -->
+                                @if ($selected_district_id)
+                                    <input type="hidden" name="district_id"
+                                        value="{{ $encrypted_params['district_id'] ?? '' }}">
+                                @endif
+    
+                                @if ($selected_management_id)
+                                    <input type="hidden" name="management_id"
+                                        value="{{ $encrypted_params['management_id'] ?? '' }}">
+                                @endif
+                                @if ($selected_school_id)
+                                    <input type="hidden" name="school_id"
+                                        value="{{ $encrypted_params['school_id'] ?? '' }}">
+                                @endif
+                                @if ($gender_param)
+                                    <input type="hidden" name="gender" value="{{ $gender_param }}">
+                                @endif
+                                @if ($class_param)
+                                    <input type="hidden" name="class" value="{{ $class_param }}">
+                                @endif
+                                @if ($category_param)
+                                    <input type="hidden" name="category" value="{{ $category_param }}">
+                                @endif
+                                @if ($academic_year_param)
+                                    <input type="hidden" name="academic_year" value="{{ $academic_year_param }}">
+                                @endif
+                                @if ($bpl_param !== '')
+                                    <input type="hidden" name="bpl" value="{{ $bpl_param }}">
+                                @endif
+                                @if ($cwsn_param !== '')
+                                    <input type="hidden" name="cwsn" value="{{ $cwsn_param }}">
+                                @endif
+                               </div>
+                         </div>
+                         
+                         <div class="col-md-2">
+                            <div class="input-group">
+                                <button type="submit" class="btn btn-success"><i class="bx bx-search"></i> Search</button>
+                            </div>
+                         </div>
+                          
+                         <div class="col-md-2">
+                           <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-filter"></i></span>
                             <select class="form-select per-page-select" id="perPageSelect" name="per_page"
-                                style="border-radius: 0 12px 12px 0; border-left: 0;">
+    >
                                 <option value="10" {{ $per_page == 10 ? 'selected' : '' }}>10 per page</option>
                                 <option value="20" {{ $per_page == 20 ? 'selected' : '' }}>20 per page</option>
                                 <option value="50" {{ $per_page == 50 ? 'selected' : '' }}>50 per page</option>
                                 <option value="100" {{ $per_page == 100 ? 'selected' : '' }}>100 per page</option>
                             </select>
-                        </div>
-                    </div>
+                           </div>
+                         </div>       
+                    </div>  
+                  </form> 
                 </div>
-            </form>
-        </div>
+           </div>
+           
+          <div class="card mb-4 mt-2">
+            <h5 class="card-header bg-primary text-white fw-semibold ">Search Details</h5>
+            <div class="card-body">
+              dddddddd
+            </div>
+          </div> 
+           
+        </div>  
+       <!-- container -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
         <!-- Students Table Card -->
         <div class="table-container">
@@ -601,6 +417,7 @@
                 </div>
             </div>
 
+           
             <div class="card-body">
                 @if ($data['students']->count() > 0)
                     <div class="table-responsive">
