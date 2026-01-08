@@ -101,8 +101,8 @@
         
         
         <div class="card mb-4 mt-2">
-                <h5 class="card-header bg-primary text-white fw-semibold ">Advanced Student Filters</h5>
-                <div class="card-body">
+                <h5 class="card-header text-body fw-semibold ">Advanced Student Filters</h5>
+                <div class="card-body pt-0">
                     <div class="row g-3">
                         <!-- District -->
                         <div class="col-md-3">
@@ -284,8 +284,8 @@
            
            <!-- Search Box -->
            <div class="card mb-4 mt-2">
-                <h5 class="card-header bg-primary text-white fw-semibold ">Advanced Search</h5>
-                <div class="card-body">
+                <h5 class="card-header text-body fw-semibold">Advanced Search</h5>
+                <div class="card-body pt-0">
                 <form method="GET" action="{{ route('students.list') }}">
                     <div class="row g-3">
                          <div class="col-md-8">
@@ -351,8 +351,8 @@
            </div>
            
           <div class="card mb-4 mt-2">
-            <h5 class="card-header bg-primary text-white fw-semibold ">Search Details</h5>
-            <div class="card-body">
+            <h5 class="card-header text-body fw-semibold ">Search Details</h5>
+            <div class="card-body pt-0">
               dddddddd
             </div>
           </div> 
