@@ -6630,7 +6630,6 @@ label.btn {
   color: #fff;
   background-color: #e6381a;
   border-color: #e6381a;
-  transform: translateY(-1px);
 }
 .btn-check:focus + .btn-danger, .btn-danger:focus, .btn-danger.focus {
   color: #fff;
@@ -6661,7 +6660,6 @@ label.btn {
   background-color: #e6381a;
   border-color: #e6381a;
   box-shadow: 0 0.125rem 0.25rem 0 rgba(255, 62, 29, 0.4);
-  transform: translateY(-1px);
 }
 .btn-check:focus + .btn-outline-danger, .btn-outline-danger:focus {
   color: #fff;
