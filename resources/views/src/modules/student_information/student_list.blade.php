@@ -5,497 +5,100 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/common.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #0d6efd 100%);
-            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --warning-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-            --danger-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            --card-hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: var(--card-shadow);
-            border-radius: 20px;
-            transition: var(--transition);
-        }
-
-        .glass-card:hover {
-            box-shadow: var(--card-hover-shadow);
-            transform: translateY(-5px);
-        }
-
-        .gradient-header {
-            background: var(--primary-gradient);
-            color: white;
-            border-radius: 15px 15px 0 0;
-            padding: 20px 25px;
-            margin: -1rem -1rem 1.5rem -1rem;
-        }
-
-        .stats-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
-        }
-
-        .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--card-hover-shadow);
-        }
-
-        .stats-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-            margin-bottom: 15px;
-        }
-
-        .stats-icon.total {
-            background: var(--primary-gradient);
-        }
-
-        .stats-icon.male {
-            background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
-        }
-
-        .stats-icon.female {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-        }
-
-        .stats-icon.bpl {
-            background: var(--warning-gradient);
-        }
-
-        .stats-icon.cwsn {
-            background: var(--danger-gradient);
-        }
-
-        .stats-icon.class {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        }
-
-        .stats-number {
-            font-size: 28px;
-            font-weight: 700;
-            color: #2d3748;
-            line-height: 1;
-            margin-bottom: 5px;
-        }
-
-        .stats-label {
-            font-size: 14px;
-            color: #718096;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .search-container {
-            position: relative;
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #667eea;
-            font-size: 20px;
-            z-index: 10;
-        }
-
-        .search-input {
-            padding-left: 50px !important;
-            border-radius: 12px !important;
-            border: 2px solid #e2e8f0 !important;
-            height: 52px;
-            font-size: 16px;
-            transition: var(--transition);
-        }
-
-        .search-input:focus {
-            border-color: #667eea !important;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-        }
-
-        .filter-badge {
-            display: inline-flex;
-            align-items: center;
-            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
-            color: #667eea;
-            padding: 8px 15px;
-            border-radius: 50px;
-            margin: 5px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .filter-badge i {
-            margin-right: 8px;
-            font-size: 12px;
-        }
-
-        .filter-badge .close-filter {
-            margin-left: 10px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: var(--transition);
-        }
-
-        .filter-badge .close-filter:hover {
-            opacity: 1;
-            transform: scale(1.2);
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-        }
-
-        .table-header {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 20px 25px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .table-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2d3748;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .table-title i {
-            color: #667eea;
-        }
-
-        .action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            margin: 0 3px;
-            transition: var(--transition);
-            border: none;
-        }
-
-        .action-btn.view {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        }
-
-        .action-btn.edit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .action-btn.profile {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .action-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .student-name {
-            font-weight: 600;
-            color: #2d3748;
-            transition: var(--transition);
-        }
-
-        .student-name:hover {
-            color: #667eea;
-        }
-
-        .student-code {
-            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-family: monospace;
-            font-size: 12px;
-            color: #667eea;
-            font-weight: 500;
-        }
-
-        .gender-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .gender-badge.male {
-            background: linear-gradient(135deg, #36d1dc20 0%, #5b86e520 100%);
-            color: #5b86e5;
-        }
-
-        .gender-badge.female {
-            background: linear-gradient(135deg, #ff9a9e20 0%, #fad0c420 100%);
-            color: #ff6b6b;
-        }
-
-        .class-badge {
-            background: linear-gradient(135deg, #a8edea20 0%, #fed6e320 100%);
-            color: #ff6b9d;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .pagination-container {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .pagination .page-link {
-            border: none;
-            border-radius: 10px !important;
-            margin: 0 5px;
-            color: #4a5568;
-            font-weight: 500;
-            min-width: 40px;
-            text-align: center;
-            transition: var(--transition);
-        }
-
-        .pagination .page-item.active .page-link {
-            background: var(--primary-gradient);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .pagination .page-link:hover {
-            background: #667eea20;
-            color: #667eea;
-            transform: translateY(-2px);
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 50px 20px;
-        }
-
-        .no-data-icon {
-            font-size: 60px;
-            color: #e2e8f0;
-            margin-bottom: 20px;
-        }
-
-        .no-data h5 {
-            color: #718096;
-            font-weight: 500;
-        }
-
-        .export-dropdown .dropdown-menu {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 10px;
-            min-width: 180px;
-        }
-
-        .export-dropdown .dropdown-item {
-            padding: 10px 15px;
-            border-radius: 10px;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .export-dropdown .dropdown-item:hover {
-            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
-            transform: translateX(5px);
-        }
-
-        .record-count {
-            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            color: #667eea;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .record-count i {
-            font-size: 12px;
-        }
-
-        .per-page-select {
-            border-radius: 12px !important;
-            border: 2px solid #e2e8f0 !important;
-            height: 42px;
-            font-size: 14px;
-            transition: var(--transition);
-            min-width: 100px;
-        }
-
-        .per-page-select:focus {
-            border-color: #667eea !important;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-        }
-
-        .filter-card {
-            margin-bottom: 20px;
-        }
-
-        .filter-card .card-body {
-            padding: 25px;
-        }
-
-        .filter-group {
-            margin-bottom: 15px;
-        }
-
-        .filter-label {
-            font-size: 13px;
-            color: #718096;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        .status-indicator.active {
-            background: #38ef7d;
-        }
-
-        .status-indicator.inactive {
-            background: #f56565;
-        }
-
-        @media (max-width: 768px) {
-            .stats-card {
-                margin-bottom: 15px;
-            }
-
-            .search-input {
-                height: 48px;
-            }
-
-            .table-responsive {
-                border-radius: 15px;
-            }
-
-
-            .filter-card .card-body {
-                padding: 15px;
-            }
-        }
-    </style>
+    <link href='https://cdn.boxicons.com/3.0.6/fonts/basic/boxicons.min.css' rel='stylesheet'>
 @endpush
 
 @section('content')
-    <div class="container-fluid full-width-content py-4">
+    <div class="container-fluid px-4">
 
         <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-2 col-sm-6">
-                <div class="stats-card">
-                    <div class="stats-icon total">
-                        <i class="fas fa-users"></i>
+        <div class="row">
+            <div class="col-md-2 mb-4">
+                <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar lt-blue">
+                            <i class="bx bx-group text-primary"></i>
+                        </div>
                     </div>
-                    <div class="stats-number">{{ number_format($data['total_students']) }}</div>
-                    <div class="stats-label">Total Students</div>
+                    <h2 class="fw-bold mb-2 text-primary">{{ number_format($data['total_students']) }}</h2>
+                    <h3 class="card-title mb-0 fw-semibold">Total Students</h3>
                 </div>
+              </div>
+            </div>
+            
+            <div class="col-md-2 mb-4">
+                <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar lt-green">
+                            <i class="bx bx-user text-success"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-2 text-success">{{ number_format($data['male_students']) }}</h2>
+                    <h3 class="card-title mb-0 fw-semibold">Male</h3>
+                </div>
+              </div>
+            </div> 
+
+            <div class="col-md-2 mb-4">
+                <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar lt-yellow">
+                            <i class="bx bx-user text-warning"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-2 text-warning">{{ number_format($data['female_students']) }}</h2>
+                    <h3 class="card-title mb-0 fw-semibold">Female</h3>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-2 mb-4">
+                <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar lt-red">
+                            <i class="bx bx-user text-danger"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-2 text-danger">{{ number_format($data['bpl_students']) }}</h2>
+                    <h3 class="card-title mb-0 fw-semibold">BPL Students</h3>
+                </div>
+              </div>
             </div>
 
-            <div class="col-md-2 col-sm-6">
-                <div class="stats-card" style="background: linear-gradient(135deg, #ff996620 0%, #ff5e6220 100%);">
-                    <div class="stats-icon" style="background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%);">
-                        <i class="fas fa-user-slash"></i>
+            <div class="col-md-2 mb-4">
+                <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar lt-purple">
+                            <i class="bx bx-accessibility text-purple"></i>
+                        </div>
                     </div>
-                    <div class="stats-number">{{ number_format($data['deactivated_students'] ?? 0) }}</div>
-                    <div class="stats-label">Deactivated</div>
+                    <h2 class="fw-bold mb-2 text-purple">{{ number_format($data['bpl_students']) }}</h2>
+                    <h3 class="card-title mb-0 fw-semibold">CWSN Students</h3>
                 </div>
-            </div>
-            <div class="col-md-2 col-sm-6">
-                <div class="stats-card">
-                    <div class="stats-icon male">
-                        <i class="fas fa-male"></i>
-                    </div>
-                    <div class="stats-number">{{ number_format($data['male_students']) }}</div>
-                    <div class="stats-label">Male</div>
-                </div>
-            </div>
-            <div class="col-md-2 col-sm-6">
-                <div class="stats-card">
-                    <div class="stats-icon female">
-                        <i class="fas fa-female"></i>
-                    </div>
-                    <div class="stats-number">{{ number_format($data['female_students']) }}</div>
-                    <div class="stats-label">Female</div>
-                </div>
-            </div>
-            <div class="col-md-2 col-sm-6">
-                <div class="stats-card">
-                    <div class="stats-icon bpl">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <div class="stats-number">{{ number_format($data['bpl_students']) }}</div>
-                    <div class="stats-label">BPL Students</div>
-                </div>
-            </div>
-            <div class="col-md-2 col-sm-6">
-                <div class="stats-card">
-                    <div class="stats-icon cwsn">
-                        <i class="fas fa-wheelchair"></i>
-                    </div>
-                    <div class="stats-number">{{ number_format($data['cwsn_students']) }}</div>
-                    <div class="stats-label">CWSN Students</div>
-                </div>
+              </div>
             </div>
 
-        </div>
-
+            <div class="col-md-2 mb-4">
+                <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                        <div class="avatar lt-seegreen">
+                            <i class='bx bx-reading text-info'></i> 
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-2 text-info">{{ $data['class_distribution'] ?? 0 }}</h2>
+                    <h3 class="card-title mb-0 fw-semibold">Classes</h3>
+                </div>
+              </div>
+            </div>
+       
+        </div>      
+            
         <!-- Advanced Filters Card -->
         <div class="glass-card mb-4">
             <div class="gradient-header">
@@ -523,14 +126,12 @@
                 <form method="GET" action="{{ route('students.list') }}" id="filterForm">
                     <div class="row g-3">
                         <!-- District -->
-                        <!-- District -->
                         <div class="col-md-3">
                             <label class="form-label fw-semibold text-muted mb-2">
                                 <i class="fas fa-map-marked-alt me-2"></i>District
                             </label>
                             <select class="form-select form-select-lg" name="district_id" id="districtSelect"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;"
-                                {{ $user_role_info['is_district_officer'] || $user_role_info['is_si_officer'] || $user_role_info['is_school_user'] || $user_role_info['is_hoi_pe'] ? 'disabled' : '' }}>
+                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
                                 <option value="">All Districts</option>
                                 @foreach ($data['districts'] as $district)
                                     <option value="{{ Crypt::encrypt($district->id) }}"
@@ -539,17 +140,9 @@
                                     </option>
                                 @endforeach
                             </select>
-                           @if ($user_role_info['is_district_officer'])
-                                <small class="text-muted mt-1 d-block">
-                                    <i class="fas fa-info-circle"></i> Restricted to your assigned district
-                                </small>
-                            @elseif ($user_role_info['is_si_officer'])
-                                <small class="text-muted mt-1 d-block">
-                                    <i class="fas fa-info-circle"></i> Restricted to your assigned circle
-                                </small>
-                            @endif
                         </div>
 
+                        <!-- Block -->
                         <!-- Circle -->
                         <div class="col-md-3">
                             <label class="form-label fw-semibold text-muted mb-2">
@@ -557,10 +150,10 @@
                             </label>
                             <select class="form-select form-select-lg" name="circle_id" id="circleSelect"
                                 style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;"
-                                {{ $user_role_info['is_si_officer'] || $user_role_info['is_school_user'] || $user_role_info['is_hoi_pe'] ? 'disabled' : (!$selected_district_id ? 'disabled' : '') }}>
+                                {{ !$selected_district_id ? 'disabled' : '' }}>
                                 <option value="">All Circles</option>
                                 @if ($selected_district_id && isset($data['circles']))
-                                    @foreach ($data['circles'] as $circle)
+                                    @foreach ($data['circles']->where('district_id', $selected_district_id) as $circle)
                                         <option value="{{ Crypt::encrypt($circle->id) }}"
                                             {{ $selected_circle_id == $circle->id ? 'selected' : '' }}>
                                             {{ $circle->name }}
@@ -568,11 +161,6 @@
                                     @endforeach
                                 @endif
                             </select>
-                            @if ($user_role_info['is_school_user'])
-                                <small class="text-muted mt-1 d-block">
-                                    <i class="fas fa-info-circle"></i> Restricted to your school's circle
-                                </small>
-                            @endif
                         </div>
 
                         <!-- Management -->
@@ -581,8 +169,7 @@
                                 <i class="fas fa-university me-2"></i>Management
                             </label>
                             <select class="form-select form-select-lg" name="management_id"
-                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;"
-                                {{ $user_role_info['is_school_user'] ? 'disabled' : (!$selected_district_id ? 'disabled' : '') }}>
+                                style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
                                 <option value="">All Management</option>
                                 @foreach ($data['managements'] as $management)
                                     <option value="{{ Crypt::encrypt($management->id) }}"
@@ -591,11 +178,6 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @if ($user_role_info['is_school_user'])
-                                <small class="text-muted mt-1 d-block">
-                                    <i class="fas fa-info-circle"></i> Restricted to your school's management
-                                </small>
-                            @endif
                         </div>
 
                         <!-- School -->
@@ -605,7 +187,7 @@
                             </label>
                             <select class="form-select form-select-lg" name="school_id" id="schoolSelect"
                                 style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;"
-                                 {{ ($user_role_info['is_school_user'] || $user_role_info['is_hoi_pe']) ? 'disabled' : (!$selected_district_id ? 'disabled' : '') }}>
+                                {{ !$selected_district_id ? 'disabled' : '' }}>
                                 <option value="">All Schools</option>
                                 @if ($selected_district_id && $data['schools']->count() > 0)
                                     @foreach ($data['schools'] as $school)
@@ -616,11 +198,6 @@
                                     @endforeach
                                 @endif
                             </select>
-                            @if ($user_role_info['is_school_user'])
-                                <small class="text-muted mt-1 d-block">
-                                    <i class="fas fa-info-circle"></i> Restricted to your school only
-                                </small>
-                            @endif
                         </div>
 
                         <!-- Gender -->
@@ -712,8 +289,8 @@
                             <select class="form-select form-select-lg" name="cwsn"
                                 style="border-radius: 12px; height: 52px; border: 2px solid #e2e8f0;">
                                 <option value="">All</option>
-                                <option value="1" {{ $cwsn_param == '1' ? 'selected' : '' }}>CWSN</option>
-                                <option value="2" {{ $cwsn_param == '2' ? 'selected' : '' }}>Non-CWSN</option>
+                                <option value="2" {{ $cwsn_param == '2' ? 'selected' : '' }}>CWSN</option>
+                                <option value="0" {{ $cwsn_param == '0' ? 'selected' : '' }}>Non-CWSN</option>
                             </select>
                         </div>
 
@@ -1059,7 +636,7 @@
                                                 </span>
                                             </div>
                                             <small class="text-muted d-block mt-1">
-                                                {{-- <i class="fas fa-id-card me-1"></i> {{ $student->admission_no ?? 'N/A' }} --}}
+                                                <i class="fas fa-id-card me-1"></i> {{ $student->admission_no ?? 'N/A' }}
                                             </small>
                                         </td>
                                         <td>
@@ -1088,7 +665,7 @@
                                             <small class="text-muted d-block mt-1">
                                                 <i class="fas fa-map-marker-alt me-1"></i>
                                                 {{ $student->district->name ?? 'N/A' }},
-                                                {{ $student->circle->name ?? 'N/A' }}
+                                                {{ $student->block->name ?? 'N/A' }}
                                             </small>
                                         </td>
                                         <td>
@@ -1130,7 +707,7 @@
                                                     <i class="fas fa-heart"></i> BPL
                                                 </span>
                                             @endif
-                                            @if ($student->cwsn_y_n == 1)
+                                            @if ($student->cwsn_y_n == 2)
                                                 <span class="badge rounded-pill mt-1"
                                                     style="
                                     background: linear-gradient(135deg, #f093fb20 0%, #f5576c20 100%);
