@@ -15,9 +15,9 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}" />
 
-    <!-- Fonts -->
-    <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}" />
     <!-- Icons -->
+    <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}" />
+    <!-- Fonts -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/OpenSans/opensans.css') }}" />
 
     <!-- Core CSS -->
